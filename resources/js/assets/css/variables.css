@@ -1,0 +1,18 @@
+:root {
+    --bg1: #003b5c;
+    --bg2: #005f8d;
+    --bg3: #1d1f21;
+    --bg4: #e1f5fe;
+    --bgDarkPrincipal: #1d1f21;
+    --bgGrayLight: rgb(241, 241, 241);
+    --bgDarkGray: rgb(31, 31, 31);
+    --bgDarkGrayP: #555555;
+    --bgSuccess: #009143;
+    --bgSuccesst: rgb(3, 121, 58);
+    --bgAzulClaro: #90c1ee;
+    --bgAzulClaroH: rgb(184, 219, 252);
+    --bgDanger: #c00404;
+    --bgDanger2: #b90000;
+    --bgWhite2: #cfcfcf;
+    --bgYellow: yellow;
+}

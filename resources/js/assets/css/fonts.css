@@ -1,0 +1,12 @@
+@import "./variables.css";
+
+body {
+}
+
+.text-black {
+    color: black !important;
+}
+
+.text-bg1 {
+    color: var(--bg1) !important;
+}

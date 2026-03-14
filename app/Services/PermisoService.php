@@ -10,7 +10,7 @@ class PermisoService
 {
     protected $arrayPermisos = [
         "ADMINISTRADOR" => [
-            "usuarios.api",
+            "usuarios.paginado",
             "usuarios.index",
             "usuarios.listado",
             "usuarios.create",
@@ -20,6 +20,27 @@ class PermisoService
             "usuarios.update",
             "usuarios.destroy",
             "usuarios.password",
+
+            "productos.paginado",
+            "productos.index",
+            "productos.listado",
+            "productos.create",
+            "productos.store",
+            "productos.edit",
+            "productos.show",
+            "productos.update",
+            "productos.destroy",
+            "productos.barras",
+
+            "ventas.paginado",
+            "ventas.index",
+            "ventas.listado",
+            "ventas.create",
+            "ventas.store",
+            "ventas.edit",
+            "ventas.show",
+            "ventas.update",
+            "ventas.destroy",
 
             "configuracions.index",
             "configuracions.create",

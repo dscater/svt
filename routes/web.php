@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -53,7 +55,6 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
 
     // USUARIOS
     Route::put("usuarios/password/{user}", [UsuarioController::class, 'actualizaPassword'])->name("usuarios.password");
-    Route::get("usuarios/api", [UsuarioController::class, 'api'])->name("usuarios.api");
     Route::get("usuarios/paginado", [UsuarioController::class, 'paginado'])->name("usuarios.paginado");
     Route::get("usuarios/listado", [UsuarioController::class, 'listado'])->name("usuarios.listado");
     Route::get("usuarios/listado/byTipo", [UsuarioController::class, 'byTipo'])->name("usuarios.byTipo");
@@ -64,12 +65,20 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
         ["index", "store"]
     );
 
-    // ROLES
-    Route::get("roles/api", [RoleController::class, 'api'])->name("roles.api");
-    Route::get("roles/paginado", [RoleController::class, 'paginado'])->name("roles.paginado");
-    Route::get("roles/listado", [RoleController::class, 'listado'])->name("roles.listado");
-    Route::post("roles/actualizaPermiso/{role}", [RoleController::class, 'actualizaPermiso'])->name("roles.actualizaPermiso");
-    Route::resource("roles", RoleController::class)->only(
+    // PRODUCTOS
+    Route::get("productos/barras", [ProductoController::class, 'barras'])->name("productos.barras");
+    Route::get("productos/paginado", [ProductoController::class, 'paginado'])->name("productos.paginado");
+    Route::get("productos/listado", [ProductoController::class, 'listado'])->name("productos.listado");
+    Route::post("productos/actualizaPermiso/{role}", [ProductoController::class, 'actualizaPermiso'])->name("productos.actualizaPermiso");
+    Route::resource("productos", ProductoController::class)->only(
+        ["index", "store", "edit", "show", "update", "destroy"]
+    );
+
+    // VENTAS
+    Route::get("ventas/paginado", [VentaController::class, 'paginado'])->name("ventas.paginado");
+    Route::get("ventas/listado", [VentaController::class, 'listado'])->name("ventas.listado");
+    Route::post("ventas/actualizaPermiso/{role}", [VentaController::class, 'actualizaPermiso'])->name("ventas.actualizaPermiso");
+    Route::resource("ventas", VentaController::class)->only(
         ["index", "store", "edit", "show", "update", "destroy"]
     );
 

@@ -32,6 +32,12 @@ td .descripcion {
     color: var(--bg7) !important;
 }
 
+.bg1,
+.bg1:hover {
+    background-color: var(--bg1);
+    color: white;
+}
+
 .alert-danger,
 .bg-danger {
     background-color: var(--bgDanger) !important;
@@ -117,7 +123,7 @@ td .descripcion {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--bg3t);
+    background-color: var(--bg2t);
     transition: 0.3s;
     opacity: 0;
     color: white;

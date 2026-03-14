@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 14-03-2026 a las 19:37:41
+-- Tiempo de generación: 14-03-2026 a las 21:10:22
 -- Versión del servidor: 8.0.30
 -- Versión de PHP: 8.2.22
 
@@ -101,6 +101,14 @@ CREATE TABLE `productos` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `productos`
+--
+
+INSERT INTO `productos` (`id`, `codigo`, `nombre`, `foto`, `marca`, `modelo`, `precio`, `talla`, `fecha_registro`, `hora_registro`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'PROD-0001', 'PRODUCTO 1', '11773519312.png', 'MARCA 1', 'MODELO 1', 150.00, 'M', '2026-03-14', '16:06:11', 1, '2026-03-14 20:05:05', '2026-03-14 20:15:28'),
+(2, 'PROD-0002', 'PRODUCTO 2', '21773519378.jpeg', 'MARCA 2', '', NULL, '', '2026-03-14', '16:16:18', 1, '2026-03-14 20:16:18', '2026-03-14 20:16:18');
 
 -- --------------------------------------------------------
 
@@ -230,7 +238,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `qrs`

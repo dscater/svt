@@ -27,7 +27,7 @@ const logout = () => {
         .post(route("logout"))
         .then((response) => {})
         .finally(() => {
-            window.location.href = route("login");
+            window.location.href = "/";
         });
 };
 
@@ -46,11 +46,7 @@ onMounted(() => {
     window.addEventListener("keydown", resetTimer);
     window.addEventListener("click", resetTimer);
 
-    // Iniciar temporizador
-    if (auth.user.tipo != "POSTULANTE") {
-        INACTIVITY_LIMIT = 60 * 1000; // 1 minuto en ms
-    }
-    resetTimer();
+    // resetTimer();
 });
 
 onBeforeMount(() => {

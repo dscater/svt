@@ -1,7 +1,7 @@
 <script setup>
 import MiModal from "@/Components/MiModal.vue";
 import { useForm, usePage } from "@inertiajs/vue3";
-import { useRoles } from "@/composables/roles/useRoles";
+import { useProductos } from "@/composables/productos/useProductos";
 import { watch, ref, computed, defineEmits, onMounted, nextTick } from "vue";
 const props = defineProps({
     muestra_formulario: {
@@ -14,26 +14,27 @@ const props = defineProps({
     },
 });
 
-const { oRole, limpiarRole } = useRoles();
+const { oProducto, limpiarProducto } = useProductos();
 const accion_form = ref(props.accion_formulario);
 const muestra_form = ref(props.muestra_formulario);
 const enviando = ref(false);
-let form = useForm(oRole.value);
+let form = useForm(oProducto.value);
 watch(
     () => props.muestra_formulario,
     (newValue) => {
         muestra_form.value = newValue;
         if (muestra_form.value) {
+            archivo.value.value = null;
             document
                 .getElementsByTagName("body")[0]
                 .classList.add("modal-open");
-            form = useForm(oRole.value);
+            form = useForm(oProducto.value);
         } else {
             document
                 .getElementsByTagName("body")[0]
                 .classList.remove("modal-open");
         }
-    }
+    },
 );
 watch(
     () => props.accion_formulario,
@@ -42,7 +43,7 @@ watch(
         if (accion_form.value == 0) {
             form["_method"] = "POST";
         }
-    }
+    },
 );
 
 const { flash } = usePage().props;
@@ -54,8 +55,8 @@ function cargaArchivo(e, key) {
 
 const tituloDialog = computed(() => {
     return accion_form.value == 0
-        ? `<i class="fa fa-plus"></i> Nuevo Role`
-        : `<i class="fa fa-edit"></i> Editar Role`;
+        ? `<i class="fa fa-plus"></i> Nuevo Producto`
+        : `<i class="fa fa-edit"></i> Editar Producto`;
 });
 
 const textBtn = computed(() => {
@@ -72,8 +73,8 @@ const enviarFormulario = () => {
     enviando.value = true;
     let url =
         accion_form.value == 0
-            ? route("roles.store")
-            : route("roles.update", form.id);
+            ? route("productos.store")
+            : route("productos.update", form.id);
 
     form.post(url, {
         preserveScroll: true,
@@ -92,7 +93,7 @@ const enviarFormulario = () => {
                 },
             });
             form.reset();
-            limpiarRole();
+            limpiarProducto();
             emits("envio-formulario");
         },
         onError: (err, code) => {
@@ -139,6 +140,15 @@ watch(muestra_form, (newVal) => {
     }
 });
 
+const archivo = ref(null);
+const cargarArchivo = (e, key) => {
+    form[key] = null;
+    const file = e.target.files[0];
+    if (file) {
+        form[key] = e.target.files[0];
+    }
+};
+
 const cerrarFormulario = () => {
     muestra_form.value = false;
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
@@ -173,8 +183,28 @@ onMounted(() => {});
                     <span class="text-danger">(*)</span> son obligatorios.
                 </p>
                 <div class="row">
-                    <div class="col-md-12 mt-2">
-                        <label class="required">Nombre de Role</label>
+                    <div class="col-md-4 mt-2">
+                        <label class="required">Foto</label>
+                        <input
+                            type="file"
+                            class="form-control"
+                            :class="{
+                                'parsley-error': form.errors?.foto,
+                            }"
+                            ref="archivo"
+                            @change="cargarArchivo($event, 'foto')"
+                        />
+                        <ul
+                            v-if="form.errors?.foto"
+                            class="d-block text-danger list-unstyled"
+                        >
+                            <li class="parsley-required">
+                                {{ form.errors?.foto }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <label class="required">Nombre de Producto</label>
                         <el-input
                             type="text"
                             :class="{
@@ -189,6 +219,83 @@ onMounted(() => {});
                         >
                             <li class="parsley-required">
                                 {{ form.errors?.nombre }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <label class="">Marca</label>
+                        <el-input
+                            type="text"
+                            :class="{
+                                'parsley-error': form.errors?.marca,
+                            }"
+                            v-model="form.marca"
+                            autosize
+                        ></el-input>
+                        <ul
+                            v-if="form.errors?.marca"
+                            class="d-block text-danger list-unstyled"
+                        >
+                            <li class="parsley-required">
+                                {{ form.errors?.marca }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <label class="">Modelo</label>
+                        <el-input
+                            type="text"
+                            :class="{
+                                'parsley-error': form.errors?.modelo,
+                            }"
+                            v-model="form.modelo"
+                            autosize
+                        ></el-input>
+                        <ul
+                            v-if="form.errors?.modelo"
+                            class="d-block text-danger list-unstyled"
+                        >
+                            <li class="parsley-required">
+                                {{ form.errors?.modelo }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <label class="">Precio</label>
+                        <input
+                            type="number"
+                            class="form-control"
+                            :class="{
+                                'parsley-error': form.errors?.precio,
+                            }"
+                            v-model="form.precio"
+                            autosize
+                        />
+                        <ul
+                            v-if="form.errors?.precio"
+                            class="d-block text-danger list-unstyled"
+                        >
+                            <li class="parsley-required">
+                                {{ form.errors?.precio }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <label class="">Talla</label>
+                        <el-input
+                            type="text"
+                            :class="{
+                                'parsley-error': form.errors?.talla,
+                            }"
+                            v-model="form.talla"
+                            autosize
+                        ></el-input>
+                        <ul
+                            v-if="form.errors?.talla"
+                            class="d-block text-danger list-unstyled"
+                        >
+                            <li class="parsley-required">
+                                {{ form.errors?.talla }}
                             </li>
                         </ul>
                     </div>

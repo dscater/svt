@@ -49,10 +49,8 @@ const enviarFormulario = () => {
                     icon: "success",
                     title: "Correcto",
                     html: `<strong>Sesión iniciada correctamente</strong>`,
-                    confirmButtonText: `Aceptar`,
-                    customClass: {
-                        confirmButton: "btn-success",
-                    },
+                    showConfirmButton: false,
+                    timer: 1500,
                 });
                 setTimeout(() => {
                     window.location.href = route("inicio");

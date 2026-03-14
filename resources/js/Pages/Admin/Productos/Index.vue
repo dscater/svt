@@ -2,12 +2,13 @@
 import Content from "@/Components/Content.vue";
 import MiTable from "@/Components/MiTable.vue";
 import { Head, Link, router, usePage } from "@inertiajs/vue3";
-import { useRoles } from "@/composables/roles/useRoles";
+import { useProductos } from "@/composables/productos/useProductos";
 import { useAxios } from "@/composables/axios/useAxios";
 import { ref, onMounted, onBeforeMount } from "vue";
 import { useAppStore } from "@/stores/aplicacion/appStore";
 // import { useMenu } from "@/composables/useMenu";
 import Formulario from "./Formulario.vue";
+import { buttonProps } from "element-plus";
 // const { mobile, identificaDispositivo } = useMenu();
 const { props: props_page } = usePage();
 const appStore = useAppStore();
@@ -19,20 +20,55 @@ onMounted(() => {
     appStore.stopLoading();
 });
 
-const { setRole, limpiarRole } = useRoles();
+const { setProducto, limpiarProducto } = useProductos();
 const { axiosDelete } = useAxios();
 
 const miTable = ref(null);
 const headers = [
     {
-        label: "",
+        label: "NRO.",
         key: "id",
         sortable: true,
         width: "4%",
     },
     {
-        label: "NOMBRE DE ROLES",
+        label: "CÓDIGO",
+        key: "codigo",
+        sortable: true,
+    },
+    {
+        label: "NOMBRE",
         key: "nombre",
+        sortable: true,
+    },
+    {
+        label: "MARCA",
+        key: "marca",
+        sortable: true,
+    },
+    {
+        label: "MODELO",
+        key: "modelo",
+        sortable: true,
+    },
+    {
+        label: "PRECIO",
+        key: "precio",
+        sortable: true,
+    },
+    {
+        label: "TALLA",
+        key: "talla",
+        sortable: true,
+    },
+    {
+        label: "FOTO",
+        key: "foto",
+        sortable: true,
+    },
+    {
+        label: "FECHA REGISTRO",
+        key: "fecha_registro",
         sortable: true,
     },
     {
@@ -52,13 +88,15 @@ const accion_formulario = ref(0);
 const muestra_formulario = ref(false);
 
 const agregarRegistro = () => {
-    limpiarRole();
+    limpiarProducto();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
 };
 
-const editarPermisos = (item) => {
-    router.get(route("roles.edit", item.id));
+const imprimirBarras = (id) => {
+    const url = route("productos.barras") + "?producto_id=" + id;
+
+    window.open(url, "_blank");
 };
 
 const updateDatatable = async () => {
@@ -68,7 +106,7 @@ const updateDatatable = async () => {
     }
 };
 
-const eliminarRole = (item) => {
+const eliminarProducto = (item) => {
     Swal.fire({
         title: "¿Quierés eliminar este registro?",
         html: `<strong>${item.nombre}</strong>`,
@@ -82,7 +120,9 @@ const eliminarRole = (item) => {
     }).then(async (result) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
-            let respuesta = await axiosDelete(route("roles.destroy", item.id));
+            let respuesta = await axiosDelete(
+                route("productos.destroy", item.id),
+            );
             if (respuesta && respuesta.sw) {
                 updateDatatable();
             }
@@ -91,12 +131,12 @@ const eliminarRole = (item) => {
 };
 </script>
 <template>
-    <Head title="Roles"></Head>
+    <Head title="Productos"></Head>
     <Content>
         <template #header>
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Roles</h1>
+                    <h1 class="m-0">Productos</h1>
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-6">
@@ -104,7 +144,7 @@ const eliminarRole = (item) => {
                         <li class="breadcrumb-item">
                             <Link :href="route('inicio')">Inicio</Link>
                         </li>
-                        <li class="breadcrumb-item active">Roles</li>
+                        <li class="breadcrumb-item active">Productos</li>
                     </ol>
                 </div>
                 <!-- /.col -->
@@ -119,14 +159,27 @@ const eliminarRole = (item) => {
                             v-if="
                                 props_page.auth?.user.permisos == '*' ||
                                 props_page.auth?.user.permisos.includes(
-                                    'roles.create'
+                                    'productos.create',
                                 )
                             "
                             type="button"
                             class="btn btn-success"
                             @click="agregarRegistro"
                         >
-                            <i class="fa fa-plus"></i> Nuevo Role
+                            <i class="fa fa-plus"></i> Nuevo Producto
+                        </button>
+                        <button
+                            v-if="
+                                props_page.auth?.user.permisos == '*' ||
+                                props_page.auth?.user.permisos.includes(
+                                    'productos.barras',
+                                )
+                            "
+                            class="btn bg1 ml-1"
+                            @click="imprimirBarras('todos')"
+                        >
+                            <i class="fa fa-barcode"></i> Imprimir Todos los
+                            Códigos de Barra
                         </button>
                     </div>
                     <div class="col-md-8 my-1">
@@ -161,7 +214,7 @@ const eliminarRole = (item) => {
                             ref="miTable"
                             :cols="headers"
                             :api="true"
-                            :url="route('roles.paginado')"
+                            :url="route('productos.paginado')"
                             :numPages="5"
                             :multiSearch="multiSearch"
                             :syncOrderBy="'id'"
@@ -170,37 +223,32 @@ const eliminarRole = (item) => {
                             :header-class="'bg__primary'"
                             fixed-header
                         >
-                            <template #imagen="{ item }">
-                                <img :src="item.url_imagen" height="90px" />
+                            <template #codigo="{ item }">
+                                <el-tooltip
+                                    class="box-item"
+                                    effect="dark"
+                                    content="Imprimir"
+                                    placement="left-start"
+                                >
+                                    <button
+                                        class="btn bg1"
+                                        @click="imprimirBarras(item.id)"
+                                    >
+                                        {{ item.codigo }}
+                                        <i
+                                            class="fa fa-external-link-alt"
+                                        ></i></button
+                                ></el-tooltip>
+                            </template>
+                            <template #foto="{ item }">
+                                <img :src="item.url_foto" width="90px" />
                             </template>
                             <template #accion="{ item }">
                                 <template
                                     v-if="
                                         props_page.auth?.user.permisos == '*' ||
                                         props_page.auth?.user.permisos.includes(
-                                            'roles.edit'
-                                        )
-                                    "
-                                >
-                                    <el-tooltip
-                                        class="box-item"
-                                        effect="dark"
-                                        content="Permisos"
-                                        placement="left-start"
-                                    >
-                                        <button
-                                            class="btn btn-info"
-                                            @click="editarPermisos(item)"
-                                        >
-                                            <i class="fa fa-list"></i></button
-                                    ></el-tooltip>
-                                </template>
-
-                                <template
-                                    v-if="
-                                        props_page.auth?.user.permisos == '*' ||
-                                        props_page.auth?.user.permisos.includes(
-                                            'roles.edit'
+                                            'productos.edit',
                                         )
                                     "
                                 >
@@ -213,7 +261,7 @@ const eliminarRole = (item) => {
                                         <button
                                             class="btn btn-warning"
                                             @click="
-                                                setRole(item);
+                                                setProducto(item);
                                                 accion_formulario = 1;
                                                 muestra_formulario = true;
                                             "
@@ -224,12 +272,10 @@ const eliminarRole = (item) => {
 
                                 <template
                                     v-if="
-                                        item.id != 2 &&
-                                        (props_page.auth?.user.permisos ==
-                                            '*' ||
-                                            props_page.auth?.user.permisos.includes(
-                                                'roles.destroy'
-                                            ))
+                                        props_page.auth?.user.permisos == '*' ||
+                                        props_page.auth?.user.permisos.includes(
+                                            'productos.destroy',
+                                        )
                                     "
                                 >
                                     <el-tooltip
@@ -240,7 +286,7 @@ const eliminarRole = (item) => {
                                     >
                                         <button
                                             class="btn btn-danger"
-                                            @click="eliminarRole(item)"
+                                            @click="eliminarProducto(item)"
                                         >
                                             <i
                                                 class="fa fa-trash-alt"

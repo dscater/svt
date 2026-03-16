@@ -123,7 +123,9 @@ onUnmounted(() => {});
                         class="nav-header font-weight-bold bg-principal"
                         v-if="
                             permisos == '*' ||
-                            permisos.includes('usuarios.index')
+                            permisos.includes('usuarios.index') ||
+                            permisos.includes('ventas.index') ||
+                            permisos.includes('productos.index')
                         "
                     >
                         ADMINISTRACIÓN
@@ -160,17 +162,32 @@ onUnmounted(() => {});
                     <ItemMenu
                         v-if="
                             permisos == '*' ||
+                            permisos.includes('ventas.historial')
+                        "
+                        :label="'Historial de Ventas'"
+                        :ruta="'ventas.historial'"
+                        :icon="'fa fa-table'"
+                    ></ItemMenu>
+                    <ItemMenu
+                        v-if="permisos == '*' || permisos.includes('qrs.index')"
+                        :label="'Qr de Pago'"
+                        :ruta="'qrs.index'"
+                        :icon="'fa fa-qrcode'"
+                    ></ItemMenu>
+                    <ItemMenu
+                        v-if="
+                            permisos == '*' ||
                             permisos.includes('configuracions.index')
                         "
                         :label="'Configuración Sistema'"
                         :ruta="'configuracions.index'"
                         :icon="'fa fa-cog'"
                     ></ItemMenu>
-                    <ItemMenu
+                    <!-- <ItemMenu
                         :label="'Perfil'"
                         :ruta="'profile.edit'"
                         :icon="'fa fa-id-card'"
-                    ></ItemMenu>
+                    ></ItemMenu> -->
                     <li class="nav-item">
                         <a
                             href="#"

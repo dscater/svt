@@ -1,39 +1,75 @@
 <script setup>
 import Content from "@/Components/Content.vue";
 import MiTable from "@/Components/MiTable.vue";
-import { Head, Link, usePage } from "@inertiajs/vue3";
-import { useUsuarios } from "@/composables/usuarios/useUsuarios";
-import { ref, onMounted, onBeforeMount } from "vue";
-import Formulario from "./Formulario.vue";
-import FormPassword from "./FormPassword.vue";
-import { useAppStore } from "@/stores/aplicacion/appStore";
+import { Head, Link, router, usePage } from "@inertiajs/vue3";
+import { useVentas } from "@/composables/ventas/useVentas";
 import { useAxios } from "@/composables/axios/useAxios";
+import { ref, onMounted, onBeforeMount } from "vue";
+import { useAppStore } from "@/stores/aplicacion/appStore";
 const { props: props_page } = usePage();
 const appStore = useAppStore();
-const { axiosDelete } = useAxios();
-
 onBeforeMount(() => {
     appStore.startLoading();
 });
 
-const { setUsuario, limpiarUsuario } = useUsuarios();
+onMounted(() => {
+    appStore.stopLoading();
+});
+
+const { setVenta, limpiarVenta } = useVentas();
+const { axiosDelete } = useAxios();
 
 const miTable = ref(null);
 const headers = [
     {
-        label: "",
-        key: "id",
+        label: "CÓD. VENTA",
+        key: "venta.id",
         sortable: true,
-        width: "3%",
+        width: "4%",
     },
     {
-        label: "USUARIO",
-        key: "usuario",
+        label: "CÓDIGO",
+        key: "producto.codigo",
         sortable: true,
     },
     {
-        label: "TIPO",
-        key: "tipo",
+        label: "NOMBRE DEL PRODUCTO",
+        key: "producto.nombre",
+        sortable: true,
+    },
+    {
+        label: "MARCA",
+        key: "producto.marca",
+        sortable: true,
+    },
+    {
+        label: "MODELO",
+        key: "producto.modelo",
+        sortable: true,
+    },
+    {
+        label: "PRECIO",
+        key: "producto.precio",
+        sortable: true,
+    },
+    {
+        label: "TALLA",
+        key: "producto.talla",
+        sortable: true,
+    },
+    {
+        label: "TIPO PAGO",
+        key: "venta.tipo_pago",
+        sortable: true,
+    },
+    {
+        label: "FOTO",
+        key: "foto",
+        sortable: true,
+    },
+    {
+        label: "FECHA",
+        key: "venta.fecha_hora",
         sortable: true,
     },
     {
@@ -51,13 +87,17 @@ const multiSearch = ref({
 
 const accion_formulario = ref(0);
 const muestra_formulario = ref(false);
-const accion_formulario_pass = ref(0);
-const muestra_formulario_pass = ref(false);
 
 const agregarRegistro = () => {
-    limpiarUsuario();
+    limpiarVenta();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
+};
+
+const imprimirBarras = (id) => {
+    const url = route("ventas.barras") + "?venta_id=" + id;
+
+    window.open(url, "_blank");
 };
 
 const updateDatatable = async () => {
@@ -67,12 +107,12 @@ const updateDatatable = async () => {
     }
 };
 
-const eliminarUsuario = (item) => {
+const eliminarVenta = (item) => {
     Swal.fire({
-        title: "¿Quierés eliminar este registro?",
-        html: `<strong>${item.usuario}</strong>`,
+        title: "¿Quierés anular este registro?",
+        html: `<strong>Código Venta: ${item.venta.id}</strong><br/><strong>Total Productos: ${item.venta.total_productos}</strong>`,
         showCancelButton: true,
-        confirmButtonText: "Si, eliminar",
+        confirmButtonText: "Si, anular",
         cancelButtonText: "No, cancelar",
         denyButtonText: `No, cancelar`,
         customClass: {
@@ -82,7 +122,7 @@ const eliminarUsuario = (item) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
             let respuesta = await axiosDelete(
-                route("usuarios.destroy", item.id),
+                route("ventas.destroy", item.venta.id),
             );
             if (respuesta && respuesta.sw) {
                 updateDatatable();
@@ -90,19 +130,14 @@ const eliminarUsuario = (item) => {
         }
     });
 };
-
-onMounted(async () => {
-    appStore.stopLoading();
-});
 </script>
 <template>
-    <Head title="Usuarios"></Head>
-
+    <Head title="Ventas"></Head>
     <Content>
         <template #header>
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Usuarios</h1>
+                    <h1 class="m-0">Ventas</h1>
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-6">
@@ -110,30 +145,41 @@ onMounted(async () => {
                         <li class="breadcrumb-item">
                             <Link :href="route('inicio')">Inicio</Link>
                         </li>
-                        <li class="breadcrumb-item active">Usuarios</li>
+                        <li class="breadcrumb-item active">Ventas</li>
                     </ol>
                 </div>
                 <!-- /.col -->
             </div>
             <!-- /.row -->
         </template>
-
         <div class="row">
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-4">
+                        <Link
+                            v-if="
+                                props_page.auth?.user.permisos == '*' ||
+                                props_page.auth?.user.permisos.includes(
+                                    'ventas.create',
+                                )
+                            "
+                            class="btn btn-success"
+                            :href="route('ventas.create')"
+                        >
+                            <i class="fa fa-plus"></i> Nueva Venta
+                        </Link>
                         <button
                             v-if="
                                 props_page.auth?.user.permisos == '*' ||
                                 props_page.auth?.user.permisos.includes(
-                                    'usuarios.create',
+                                    'ventas.barras',
                                 )
                             "
-                            type="button"
-                            class="btn btn-success"
-                            @click="agregarRegistro"
+                            class="btn bg1 ml-1"
+                            @click="imprimirBarras('todos')"
                         >
-                            <i class="fa fa-plus"></i> Nuevo Usuario
+                            <i class="fa fa-barcode"></i> Imprimir Todos los
+                            Códigos de Barra
                         </button>
                     </div>
                     <div class="col-md-8 my-1">
@@ -168,7 +214,7 @@ onMounted(async () => {
                             ref="miTable"
                             :cols="headers"
                             :api="true"
-                            :url="route('usuarios.paginado')"
+                            :url="route('ventas.paginado')"
                             :numPages="5"
                             :multiSearch="multiSearch"
                             :syncOrderBy="'id'"
@@ -177,59 +223,35 @@ onMounted(async () => {
                             :header-class="'bg__primary'"
                             fixed-header
                         >
+                            <template #codigo="{ item }">
+                                <el-tooltip
+                                    class="box-item"
+                                    effect="dark"
+                                    content="Imprimir"
+                                    placement="left-start"
+                                >
+                                    <button
+                                        class="btn bg1"
+                                        @click="imprimirBarras(item.id)"
+                                    >
+                                        {{ item.codigo }}
+                                        <i
+                                            class="fa fa-external-link-alt"
+                                        ></i></button
+                                ></el-tooltip>
+                            </template>
                             <template #foto="{ item }">
                                 <img
-                                    class="direct-chat-img"
-                                    :src="item.url_foto"
-                                    alt="Foto"
+                                    :src="item.producto.url_foto"
+                                    width="90px"
                                 />
                             </template>
-
-                            <template #acceso="{ item }">
-                                <div
-                                    class="badge text-sm"
-                                    :class="[
-                                        item.acceso == 1
-                                            ? 'bg-success'
-                                            : 'bg-danger',
-                                    ]"
-                                >
-                                    {{
-                                        item.acceso == 1
-                                            ? "HABILITADO"
-                                            : "DESHABILITADO"
-                                    }}
-                                </div>
-                            </template>
                             <template #accion="{ item }">
-                                <template
-                                    v-if="
-                                        props_page.auth?.user.role_id == 1 ||
-                                        props_page.auth?.user.role_id == 2
-                                    "
-                                >
-                                    <el-tooltip
-                                        class="box-item"
-                                        effect="dark"
-                                        content="Cambiar contraseña"
-                                        placement="left-start"
-                                    >
-                                        <button
-                                            class="btn btn-info"
-                                            @click="
-                                                setUsuario(item);
-                                                accion_formulario_pass = 1;
-                                                muestra_formulario_pass = true;
-                                            "
-                                        >
-                                            <i class="fa fa-key"></i></button
-                                    ></el-tooltip>
-                                </template>
-                                <template
+                                <!-- <template
                                     v-if="
                                         props_page.auth?.user.permisos == '*' ||
                                         props_page.auth?.user.permisos.includes(
-                                            'usuarios.edit',
+                                            'ventas.edit',
                                         )
                                     "
                                 >
@@ -242,35 +264,34 @@ onMounted(async () => {
                                         <button
                                             class="btn btn-warning"
                                             @click="
-                                                setUsuario(item);
+                                                setVenta(item);
                                                 accion_formulario = 1;
                                                 muestra_formulario = true;
                                             "
                                         >
                                             <i class="fa fa-pen"></i></button
                                     ></el-tooltip>
-                                </template>
+                                </template> -->
+
                                 <template
                                     v-if="
                                         props_page.auth?.user.permisos == '*' ||
                                         props_page.auth?.user.permisos.includes(
-                                            'usuarios.destroy',
+                                            'ventas.destroy',
                                         )
                                     "
                                 >
                                     <el-tooltip
                                         class="box-item"
                                         effect="dark"
-                                        content="Eliminar"
+                                        content="Anular"
                                         placement="left-start"
                                     >
                                         <button
                                             class="btn btn-danger"
-                                            @click="eliminarUsuario(item)"
+                                            @click="eliminarVenta(item)"
                                         >
-                                            <i
-                                                class="fa fa-trash-alt"
-                                            ></i></button
+                                            <i class="fa fa-ban"></i></button
                                     ></el-tooltip>
                                 </template>
                             </template>
@@ -280,17 +301,4 @@ onMounted(async () => {
             </div>
         </div>
     </Content>
-
-    <Formulario
-        :muestra_formulario="muestra_formulario"
-        :accion_formulario="accion_formulario"
-        @envio-formulario="updateDatatable"
-        @cerrar-formulario="muestra_formulario = false"
-    ></Formulario>
-    <FormPassword
-        :muestra_formulario="muestra_formulario_pass"
-        :accion_formulario="accion_formulario_pass"
-        @envio-formulario="muestra_formulario_pass = false"
-        @cerrar-formulario="muestra_formulario_pass = false"
-    ></FormPassword>
 </template>

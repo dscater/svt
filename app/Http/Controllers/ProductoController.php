@@ -11,6 +11,7 @@ use App\Models\Permiso;
 use App\Models\Producto;
 use App\Models\User;
 use App\Services\ProductoService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,9 +51,15 @@ class ProductoController extends Controller
 
         $productos = $productos->get();
         $pdf = PDF::loadView('reportes.barras', compact('productos'));
-        $pdf->setPaper([0, 0, 164, 85]);
+        $pdf->setPaper([0, 0, $this->cmToPt(4), $this->cmToPt(3)]);
         $pdf->output();
         return $pdf->stream('productos.pdf');
+    }
+
+
+    function cmToPt($cm)
+    {
+        return $cm * 28.346;
     }
 
     /**
@@ -141,52 +148,34 @@ class ProductoController extends Controller
         return response()->JSON($producto);
     }
 
-    public function edit(Producto $producto): ResponseInertia
+    public function byCodigo(Request $request): JsonResponse
     {
-        $modulos_group = Modulo::select('modulo')->distinct()->pluck('modulo');
+        try {
+            Log::debug("AA");
+            $codigo = $request->codigo;
+            $producto = Producto::where("codigo", $codigo)->get()->first();
 
-        $array_modulos = [];
-        $array_permisos = [];
-        foreach ($modulos_group as $value) {
-            $array_modulos[$value] = Modulo::where("modulo", $value)->get();
-            $array_permisos[$value] = Permiso::select("modulos.nombre", "modulos.accion")->join("modulos", "modulos.id", "=", "permisos.modulo_id")
-                ->where("producto_id", $producto->id)
-                ->where("modulo", $value)->get();
+            if (!$producto) {
+                throw new Exception("No hay ningún producto con ese código");
+            }
+
+            if ($producto->status == 0) {
+                throw new Exception("No se encontró el producto");
+            }
+
+            if ($producto->status == 2) {
+                throw new Exception("El producto ya fue vendido");
+            }
+
+            return response()->JSON($producto);
+        } catch (\Exception $e) {
+            Log::debug("BB");
+            throw ValidationException::withMessages([
+                'error' =>  $e->getMessage(),
+            ]);
         }
-
-        return Inertia::render("Admin/Productos/Permisos", compact("producto", "modulos_group", "array_modulos", "array_permisos"));
     }
 
-    public function actualizaPermiso(Producto $producto, Request $request)
-    {
-        $sw_cambio = $request->sw_cambio;
-        $modulo = $request->modulo;
-        $accion = $request->accion;
-        $o_modulo = Modulo::where("modulo", $modulo)->where("accion", $accion)->get()->first();
-        $permiso = Permiso::where("producto_id", $producto->id)
-            ->where("modulo_id", $o_modulo->id)
-            ->get()->first();
-        if ($sw_cambio == 1) {
-            if (!$permiso) {
-                $producto->o_permisos()->create([
-                    "modulo_id" => $o_modulo->id
-                ]);
-            }
-        } else {
-            if ($permiso) {
-                $permiso->delete();
-            }
-        }
-
-        $array_permisos = Permiso::select("modulos.nombre", "modulos.accion")
-            ->join("modulos", "modulos.id", "=", "permisos.modulo_id")
-            ->where("producto_id", $producto->id)
-            ->where("modulos.modulo", $o_modulo->modulo)->get();
-
-        return response()->JSON([
-            "array_permisos" => $array_permisos
-        ]);
-    }
 
     public function update(Producto $producto, ProductoUpdateRequest $request)
     {

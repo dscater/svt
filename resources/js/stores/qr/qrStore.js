@@ -1,19 +1,20 @@
 import axios from "axios";
 import { defineStore } from "pinia";
-export const useConfiguracionStore = defineStore("configuracion", {
+export const useQrStore = defineStore("qr", {
     state: () => ({
-        oConfiguracion: {
-            sistema: "SVT",
-            alias: "SVT",
-            url_logo: "",
+        oQr: {
+            qr: "",
+            remitente: "",
+            fecha_vencimiento: "",
+            _method: "put",
         },
     }),
     actions: {
-        initConfiguracion() {
+        initQr() {
             axios
-                .get(route("configuracions.getConfiguracion"))
+                .get(route("qrs.getQr"))
                 .then((response) => {
-                    this.setConfiguracion(response.data.configuracion);
+                    this.setQr(response.data.qr);
                 })
                 .catch((error) => {
                     console.log("Error al cargar la configuración");
@@ -22,13 +23,13 @@ export const useConfiguracionStore = defineStore("configuracion", {
                     console.log("Configuración cargada");
                 });
         },
-        setConfiguracion(value) {
-            this.oConfiguracion = { ...value };
+        setQr(value) {
+            this.oQr = { ...value };
         },
     },
     getters: {
-        getConfiguracion() {
-            return this.oConfiguracion;
+        getQr() {
+            return this.oQr;
         },
     },
 });

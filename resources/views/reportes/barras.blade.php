@@ -17,6 +17,7 @@
 
         .etiqueta {
             /* width: 58mm; */
+            padding-top: 10px;
             text-align: center;
             margin: 0px;
             padding: 10px
@@ -47,7 +48,8 @@
     @endphp
     @foreach ($productos as $key => $p)
         <div class="etiqueta">
-            <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($p->codigo, 'C128', 1.66, 75) }}" />
+            <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($p->codigo, 'C128', 1.67, 75) }}" />
+            <div class="codigo">{{ $p->nombre }}</div>
             <div class="codigo">{{ $p->codigo }}</div>
         </div>
         @php

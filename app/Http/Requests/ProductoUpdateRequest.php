@@ -23,7 +23,8 @@ class ProductoUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "nombre" => "required|unique:productos,nombre," . $this->producto->id,
+            // "nombre" => "required|unique:productos,nombre," . $this->producto->id,
+            "nombre" => "required",
             "foto" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8048",
             "marca" => "nullable",
             "modelo" => "nullable",

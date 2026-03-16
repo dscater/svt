@@ -52,7 +52,7 @@
     @inertiaHead
 </head>
 
-<body class="app-blank layout-fixed">
+<body class="app-blank layout-fixed layout-navbar-fixed">
     @inertia
 </body>
 

@@ -31,6 +31,7 @@ class PermisoService
             "productos.update",
             "productos.destroy",
             "productos.barras",
+            "productos.byCodigo",
 
             "ventas.paginado",
             "ventas.index",
@@ -41,6 +42,8 @@ class PermisoService
             "ventas.show",
             "ventas.update",
             "ventas.destroy",
+            "ventas.historial",
+            "ventas.paginadoHistorial",
 
             "configuracions.index",
             "configuracions.create",
@@ -48,13 +51,36 @@ class PermisoService
             "configuracions.update",
             "configuracions.destroy",
 
-            "reportes.usuarios",
-            "reportes.r_usuarios",
-            "reportes.productos",
-            "reportes.r_productos",
+            "qrs.index",
+            "qrs.create",
+            "qrs.edit",
+            "qrs.update",
+            "qrs.destroy",
+            "qrs.getQr",
+
+            // "reportes.usuarios",
+            // "reportes.r_usuarios",
+            "reportes.ventas",
+            "reportes.r_ventas",
 
         ],
-        "VENDEDOR" => [],
+        "VENDEDOR" => [
+
+            "ventas.paginado",
+            "ventas.index",
+            "ventas.listado",
+            "ventas.create",
+            "ventas.store",
+            "ventas.show",
+            "ventas.historial",
+            "ventas.paginadoHistorial",
+
+            "qrs.index",
+            "qrs.getQr",
+
+            "reportes.ventas",
+            "reportes.r_ventas",
+        ],
     ];
 
 

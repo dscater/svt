@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\Venta;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -11,9 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class UserService
 {
-    private $modulo = "USUARIOS";
-
-    public function __construct(private  CargarArchivoService $cargarArchivoService, private HistorialAccionService $historialAccionService) {}
+    public function __construct(private  CargarArchivoService $cargarArchivoService) {}
 
 
     /**
@@ -158,28 +158,10 @@ class UserService
     public function crear(array $datos): User
     {
         $user = User::create([
-            "nombre" => mb_strtoupper($datos["nombre"]),
-            "paterno" => mb_strtoupper($datos["paterno"]),
-            "materno" => mb_strtoupper($datos["materno"]),
-            "dir" => mb_strtoupper($datos["dir"]),
-            "ci" => $datos["ci"],
-            "ci_exp" => $datos["ci_exp"],
-            "fono" => $datos["fono"],
-            "correo" => $datos["correo"],
-            "usuario" => $this->getNombreUsuario($datos["nombre"], $datos["paterno"]),
-            "password" => $datos["ci"],
-            "tipo" => "ADMINISTRATIVO",
-            "acceso" => $datos["acceso"],
-            "fecha_registro" => date("Y-m-d")
+            "usuario" => mb_strtoupper($datos["usuario"]),
+            "password" => $datos["password"],
+            "tipo" => mb_strtoupper($datos["tipo"]),
         ]);
-
-        // cargar foto
-        if ($datos["foto"] && !is_string($datos["foto"])) {
-            $this->cargarFoto($user, $datos["foto"]);
-        }
-
-        // registrar accion
-        $this->historialAccionService->registrarAccion($this->modulo, "CREACIÓN", "REGISTRO UN USUARIO", $user);
 
         return $user;
     }
@@ -193,28 +175,15 @@ class UserService
      */
     public function actualizar(array $datos, User $user): User
     {
-        $old_user = clone $user;
         $user->update([
-            "nombre" => mb_strtoupper($datos["nombre"]),
-            "paterno" => mb_strtoupper($datos["paterno"]),
-            "materno" => mb_strtoupper($datos["materno"]),
-            "dir" => mb_strtoupper($datos["dir"]),
-            "ci" => $datos["ci"],
-            "ci_exp" => $datos["ci_exp"],
-            "fono" => $datos["fono"],
-            "correo" => $datos["correo"],
-            "usuario" => $this->getNombreUsuario($datos["nombre"], $datos["paterno"]),
-            "password" => $datos["ci"],
-            "acceso" => $datos["acceso"],
+            "usuario" => mb_strtoupper($datos["usuario"]),
+            "tipo" => mb_strtoupper($datos["tipo"]),
         ]);
 
-        // cargar foto
-        if ($datos["foto"] && !is_string($datos["foto"])) {
-            $this->cargarFoto($user, $datos["foto"]);
+        if (!empty($datos["password"])) {
+            $user->password = $datos["password"];
+            $user->save();
         }
-
-        // registrar accion
-        $this->historialAccionService->registrarAccion($this->modulo, "MODIFICACIÓN", "ACTUALIZÓ UN USUARIO", $old_user, $user->withoutRelations());
 
         return $user;
     }
@@ -259,13 +228,13 @@ class UserService
      */
     public function eliminar(User $user): bool
     {
-        // no eliminar users predeterminados para el funcionamiento del sistema
-        $old_user = User::find($user->id);
-        $user->status = 0;
-        $user->save();
+        $usos = Venta::where("user_id", $user->id)->get();
+        if (count($usos) > 0) {
+            throw new Exception("No es posible eliminar el registro porque esta ligado a otros registros");
+        }
 
-        // registrar accion
-        $this->historialAccionService->registrarAccion($this->modulo, "ELIMINACIÓN", "ELIMINÓ AL USUARIO " . $old_user->usuario, $old_user, $user);
+        $user->delete();
+
         return true;
     }
 

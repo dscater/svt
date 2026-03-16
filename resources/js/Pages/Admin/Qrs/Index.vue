@@ -7,41 +7,44 @@ import Content from "@/Components/Content.vue";
 import { onMounted, ref, computed, onBeforeMount } from "vue";
 import { usePage, Head, useForm } from "@inertiajs/vue3";
 import { useAppStore } from "@/stores/aplicacion/appStore";
-import { useConfiguracionStore } from "@/stores/configuracion/configuracionStore";
+import { useQrStore } from "@/stores/qr/qrStore";
 const appStore = useAppStore();
-const configuracionStore = useConfiguracionStore();
+const qrStore = useQrStore();
 
 onBeforeMount(() => {
     appStore.startLoading();
 });
 
 const props_page = defineProps({
-    configuracion: {
+    qr: {
         type: Object,
         default: null,
+    },
+    estado: {
+        type: String,
+        default: "NO SE CARGÓ NINGÚN QR",
+    },
+    estado_sw: {
+        type: Boolean,
+        default: false,
     },
 });
 const { props } = usePage();
 const enviando = ref(false);
 
-let form = null;
-if (props_page.configuracion != null) {
-    props_page.configuracion["_method"] = "put";
-    form = useForm(props_page.configuracion);
-} else {
-    form = useForm({
-        _method: "put",
-        id: 0,
-        nombre_sistema: "",
-        alias: "",
-        url_logo: "",
-        logo: "",
-    });
-}
+let form = useForm({
+    id: props_page.qr.id,
+    qr: props_page.qr.qr,
+    url_qr: props_page.qr.url_qr,
+    remitente: props_page.qr.remitente,
+    fecha_vencimiento: props_page.qr.fecha_vencimiento,
+    _method: "PUT",
+});
 
 const enviarFormulario = () => {
+    form["_method"] = "put";
     enviando.value = true;
-    form.post(route("configuracions.update", form.id), {
+    form.post(route("qrs.update", form.id), {
         onSuccess: (response) => {
             // Mostrar mensaje de éxito
             console.log("correcto");
@@ -77,11 +80,11 @@ const enviarFormulario = () => {
         },
         onFinish: () => {
             enviando.value = false;
-            configuracionStore.initConfiguracion();
+            qrStore.initQr();
         },
     });
 };
-const logo = ref(null);
+const qr = ref(null);
 function cargaArchivo(e, key) {
     form[key] = null;
     form[key] = e.target.files[0];
@@ -91,7 +94,7 @@ function cargaArchivo(e, key) {
     form["url_" + key] = fileUrl;
 }
 function limpiaRefs() {
-    logo.value = null;
+    qr.value = null;
 }
 
 const btnGuardar = computed(() => {
@@ -107,61 +110,80 @@ onMounted(() => {
 });
 </script>
 <template>
-    <Head title="Parametrización"></Head>
+    <Head title="QR"></Head>
     <Content>
         <form @submit.prevent="enviarFormulario()">
             <div class="row">
+                <div class="col-12 mt-3" v-if="props_page.estado_sw == false">
+                    <div class="alert alert-danger">
+                        {{ props_page.estado }}
+                    </div>
+                </div>
                 <div class="col-md-4 form-group mb-3">
-                    <label class="required">Nombre del sistema</label>
+                    <label
+                        class="required"
+                        v-if="props.auth.user.permisos.includes('qrs.edit')"
+                        >QR</label
+                    >
+                    <input
+                        v-if="props.auth.user.permisos.includes('qrs.edit')"
+                        type="file"
+                        class="form-control"
+                        @change="cargaArchivo($event, 'qr')"
+                        ref="qr"
+                    />
+                    <div class="qr_muestra w-100 text-center">
+                        <img
+                            :src="form.url_qr"
+                            alt=""
+                            v-if="form.url_qr"
+                            width="80%"
+                        />
+                    </div>
+                    <span class="text-danger" v-if="form.errors?.qr">{{
+                        form.errors.qr
+                    }}</span>
+                </div>
+                <div
+                    class="col-md-4 form-group mb-3"
+                    v-if="props.auth.user.permisos.includes('qrs.edit')"
+                >
+                    <label class="required">Nombre del remitente</label>
                     <input
                         type="text"
                         class="form-control"
-                        v-model="form.nombre_sistema"
+                        v-model="form.remitente"
+                    />
+                    <span class="text-danger" v-if="form.errors?.remitente">{{
+                        form.errors.remitente
+                    }}</span>
+                </div>
+                <div
+                    class="col-md-4 form-group mb-3"
+                    v-if="props.auth.user.permisos.includes('qrs.edit')"
+                >
+                    <label class="required">Fecha de vencimiento</label>
+                    <input
+                        type="date"
+                        class="form-control"
+                        v-model="form.fecha_vencimiento"
                     />
                     <span
                         class="text-danger"
-                        v-if="form.errors?.nombre_sistema"
-                        >{{ form.errors.nombre_sistema }}</span
+                        v-if="form.errors?.fecha_vencimiento"
+                        >{{ form.errors.fecha_vencimiento }}</span
                     >
                 </div>
-                <div class="col-md-4 form-group mb-3">
-                    <label class="required">Alias</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        v-model="form.alias"
-                    />
-                    <span class="text-danger" v-if="form.errors?.alias">{{
-                        form.errors.alias
-                    }}</span>
-                </div>
-                <div class="col-md-4 form-group mb-3">
-                    <label class="required">Logo</label>
-                    <input
-                        type="file"
-                        class="form-control"
-                        @change="cargaArchivo($event, 'logo')"
-                        ref="logo"
-                    />
-                    <div class="logo_muestra w-100 text-center">
-                        <img
-                            :src="form.url_logo"
-                            alt=""
-                            v-if="form.url_logo"
-                            width="50%"
-                        />
-                    </div>
-                    <span class="text-danger" v-if="form.errors?.logo">{{
-                        form.errors.logo
-                    }}</span>
-                </div>
             </div>
-            <div class="row pb-5">
+            <div
+                class="row pb-5"
+                v-if="props.auth.user.permisos.includes('qrs.edit')"
+            >
                 <div
                     class="col-12"
                     v-if="
                         props.auth.user.permisos == '*' ||
-                        props.auth.user.permisos.includes('configuracions.edit')
+                        props.auth.user.permisos.includes('qrs.edit')
                     "
                 >
                     <button
@@ -176,12 +198,12 @@ onMounted(() => {
     </Content>
 </template>
 <style scoped>
-.logo_muestra {
+.qr_muestra {
     margin-top: 10px;
     width: 100%;
     text-align: center;
 }
-.logo_muestra img {
+.qr_muestra img {
     max-width: 100%;
 }
 </style>

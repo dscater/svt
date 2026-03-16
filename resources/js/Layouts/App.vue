@@ -42,9 +42,9 @@ onMounted(() => {
     appStore.initUserInfo();
 
     // Eventos que consideran actividad del usuario
-    window.addEventListener("mousemove", resetTimer);
-    window.addEventListener("keydown", resetTimer);
-    window.addEventListener("click", resetTimer);
+    // window.addEventListener("mousemove", resetTimer);
+    // window.addEventListener("keydown", resetTimer);
+    // window.addEventListener("click", resetTimer);
 
     // resetTimer();
 });
@@ -52,10 +52,10 @@ onMounted(() => {
 onBeforeMount(() => {
     // verificaLogin();
     appStore.initUserInfo();
-    window.removeEventListener("mousemove", resetTimer);
-    window.removeEventListener("keydown", resetTimer);
-    window.removeEventListener("click", resetTimer);
-    if (inactivityTimer) clearTimeout(inactivityTimer);
+    // window.removeEventListener("mousemove", resetTimer);
+    // window.removeEventListener("keydown", resetTimer);
+    // window.removeEventListener("click", resetTimer);
+    // if (inactivityTimer) clearTimeout(inactivityTimer);
 });
 </script>
 <template>

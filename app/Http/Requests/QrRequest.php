@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
-class UserStoreRequest extends FormRequest
+class QrRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,26 +22,27 @@ class UserStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        Log::debug($this);
         return [
-            "usuario" => "required|min:2",
-            "password" => "required|min:6",
-            "tipo" => "required",
+            "remitente" => "required",
+            "fecha_vencimiento" => "required",
+            "qr" => "required",
         ];
     }
 
     /**
-     * Mensages validacion
+     * Mensajes validacion
      *
      * @return array
      */
     public function messages(): array
     {
         return [
-            "usuario.required" => "Este campo es obligatorio",
-            "usuario.min" => "Debes ingresar al menos :min caracteres",
-            "password.required" => "Este campo es obligatorio",
-            "password.min" => "Debes ingresar al menos :min caracteres",
-            "tipo.required" => "Este campo es obligatorio",
+            "remitente.required" => "Debes completar este campo",
+            "fecha_vencimiento.required" => "Debes completar este campo",
+            "qr.required" => "Debes completar este campo",
+            "fono.required" => "Debes completar este campo",
+            "dir.required" => "Debes completar este campo",
         ];
     }
 }

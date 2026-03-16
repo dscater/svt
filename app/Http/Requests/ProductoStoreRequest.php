@@ -22,7 +22,8 @@ class ProductoStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "nombre" => "required|unique:productos,nombre",
+            // "nombre" => "required|unique:productos,nombre",
+            "nombre" => "required",
             "foto" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:8048",
             "marca" => "nullable",
             "modelo" => "nullable",

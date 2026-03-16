@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Log;
 
 class ConfiguracionService
 {
-    private $modulo = "CONFIGURACIÓN SISTEMA";
-
     public function __construct(private CargarArchivoService $cargarArchivoService) {}
 
     /**
@@ -29,13 +27,11 @@ class ConfiguracionService
             $configuracion = Configuracion::create([
                 "nombre_sistema" => $datos["nombre_sistema"],
                 "alias" => $datos["alias"],
-                "envio_email" => $datos["envio_email"],
             ]);
         } else {
             $configuracion->update([
                 "nombre_sistema" => $datos["nombre_sistema"],
                 "alias" => $datos["alias"],
-                "envio_email" => $datos["envio_email"],
             ]);
         }
 

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('qrs', function (Blueprint $table) {
             $table->id();
             $table->string("qr", 255)->nullable();
-            $table->string("remitente", 255);
-            $table->date("fecha_vencimiento");
+            $table->string("remitente", 255)->nullable();
+            $table->date("fecha_vencimiento")->nullable();
             $table->timestamps();
         });
     }

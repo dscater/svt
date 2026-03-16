@@ -3,6 +3,7 @@
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\QrController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -69,7 +70,7 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
     Route::get("productos/barras", [ProductoController::class, 'barras'])->name("productos.barras");
     Route::get("productos/paginado", [ProductoController::class, 'paginado'])->name("productos.paginado");
     Route::get("productos/listado", [ProductoController::class, 'listado'])->name("productos.listado");
-    Route::post("productos/actualizaPermiso/{role}", [ProductoController::class, 'actualizaPermiso'])->name("productos.actualizaPermiso");
+    Route::get("productos/getProducto/byCodigo", [ProductoController::class, 'byCodigo'])->name("productos.byCodigo");
     Route::resource("productos", ProductoController::class)->only(
         ["index", "store", "edit", "show", "update", "destroy"]
     );
@@ -77,25 +78,20 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
     // VENTAS
     Route::get("ventas/paginado", [VentaController::class, 'paginado'])->name("ventas.paginado");
     Route::get("ventas/listado", [VentaController::class, 'listado'])->name("ventas.listado");
-    Route::post("ventas/actualizaPermiso/{role}", [VentaController::class, 'actualizaPermiso'])->name("ventas.actualizaPermiso");
+    Route::get("ventas/paginadoHistorial", [VentaController::class, 'paginadoHistorial'])->name("ventas.paginadoHistorial");
+    Route::get("ventas/historial", [VentaController::class, 'historial'])->name("ventas.historial");
     Route::resource("ventas", VentaController::class)->only(
-        ["index", "store", "edit", "show", "update", "destroy"]
+        ["index", "store", "create", "edit", "show", "update", "destroy"]
+    );
+
+    // QRS
+    Route::get("qrs/getQr", [QrController::class, 'getQr'])->name("qrs.getQr");
+    Route::resource("qrs", QrController::class)->only(
+        ["index", "show", "update"]
     );
 
     // REPORTES
     Route::get('reportes/usuarios', [ReporteController::class, 'usuarios'])->name("reportes.usuarios");
     Route::get('reportes/r_usuarios', [ReporteController::class, 'r_usuarios'])->name("reportes.r_usuarios");
-
-    Route::get('reportes/postulantes', [ReporteController::class, 'postulantes'])->name("reportes.postulantes");
-    Route::get('reportes/r_postulantes', [ReporteController::class, 'r_postulantes'])->name("reportes.r_postulantes");
-
-    Route::get('reportes/inscritos', [ReporteController::class, 'inscritos'])->name("reportes.inscritos");
-    Route::get('reportes/r_inscritos', [ReporteController::class, 'r_inscritos'])->name("reportes.r_inscritos");
-
-    Route::get('reportes/ginscripcions', [ReporteController::class, 'ginscripcions'])->name("reportes.ginscripcions");
-    Route::get('reportes/r_ginscripcions', [ReporteController::class, 'r_ginscripcions'])->name("reportes.r_ginscripcions");
-
-    Route::get('reportes/historial_accions', [ReporteController::class, 'historial_accions'])->name("reportes.historial_accions");
-    Route::get('reportes/r_historial_accions', [ReporteController::class, 'r_historial_accions'])->name("reportes.r_historial_accions");
 });
 require __DIR__ . '/auth.php';

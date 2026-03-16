@@ -25,13 +25,6 @@ class ConfiguracionRequest extends FormRequest
             "nombre_sistema" => "required",
             "alias" => "required",
             "logo" => "required",
-            "envio_email.host" => "required",
-            "envio_email.correo" => "required",
-            "envio_email.driver" => "required",
-            "envio_email.nombre" => "required",
-            "envio_email.puerto" => "required",
-            "envio_email.password" => "required",
-            "envio_email.encriptado" => "required",
         ];
     }
 
@@ -48,13 +41,6 @@ class ConfiguracionRequest extends FormRequest
             "logo.required" => "Debes completar este campo",
             "fono.required" => "Debes completar este campo",
             "dir.required" => "Debes completar este campo",
-            "envio_email.host.required" => "Debes completar este campo",
-            "envio_email.correo.required" => "Debes completar este campo",
-            "envio_email.driver.required" => "Debes completar este campo",
-            "envio_email.nombre.required" => "Debes completar este campo",
-            "envio_email.puerto.required" => "Debes completar este campo",
-            "envio_email.password.required" => "Debes completar este campo",
-            "envio_email.encriptado.required" => "Debes completar este campo",
         ];
     }
 }

@@ -44,6 +44,7 @@ class PermisoService
             "ventas.destroy",
             "ventas.historial",
             "ventas.paginadoHistorial",
+            "ventas.exportarPDF",
 
             "configuracions.index",
             "configuracions.create",
@@ -74,6 +75,7 @@ class PermisoService
             "ventas.show",
             "ventas.historial",
             "ventas.paginadoHistorial",
+            "ventas.exportarPDF",
 
             "qrs.index",
             "qrs.getQr",

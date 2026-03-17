@@ -83,7 +83,11 @@ class ProductoController extends Controller
         $desc = $request->desc;
 
         $columnsSerachLike = [
-            "descripcion"
+            "codigo",
+            "modelo",
+            "marca",
+            "talla",
+            "nombre"
         ];
         $columnsFilter = [];
         $columnsBetweenFilter = [];
@@ -151,7 +155,6 @@ class ProductoController extends Controller
     public function byCodigo(Request $request): JsonResponse
     {
         try {
-            Log::debug("AA");
             $codigo = $request->codigo;
             $producto = Producto::where("codigo", $codigo)->get()->first();
 

@@ -79,7 +79,9 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
     Route::get("ventas/paginado", [VentaController::class, 'paginado'])->name("ventas.paginado");
     Route::get("ventas/listado", [VentaController::class, 'listado'])->name("ventas.listado");
     Route::get("ventas/paginadoHistorial", [VentaController::class, 'paginadoHistorial'])->name("ventas.paginadoHistorial");
+    Route::get("ventas/exportarPDF", [VentaController::class, 'exportarPDF'])->name("ventas.exportarPDF");
     Route::get("ventas/historial", [VentaController::class, 'historial'])->name("ventas.historial");
+
     Route::resource("ventas", VentaController::class)->only(
         ["index", "store", "create", "edit", "show", "update", "destroy"]
     );

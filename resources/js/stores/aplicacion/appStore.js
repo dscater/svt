@@ -16,6 +16,9 @@ export const useAppStore = defineStore("app_store", {
         },
         startLoading() {
             this.loading = true;
+            setTimeout(() => {
+                if (this.loading == true) this.loading = false;
+            }, 3000);
         },
         prueba() {
             alert("prueba");
@@ -31,7 +34,7 @@ export const useAppStore = defineStore("app_store", {
         },
         async esperarCargaElementos() {
             return new Promise((resolve) =>
-                window.requestAnimationFrame(resolve)
+                window.requestAnimationFrame(resolve),
             );
         },
     },

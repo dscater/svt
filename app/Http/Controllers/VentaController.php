@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response as ResponseInertia;
+use PDF;
 
 class VentaController extends Controller
 {
@@ -32,19 +33,16 @@ class VentaController extends Controller
 
     public function paginadoHistorial(Request $request)
     {
-        $perPage = $request->perPage;
-        $page = (int)($request->input("page", 1));
         $search = (string)$request->input("search", "");
         $fecha_ini = (string)$request->input("fecha_ini", "");
         $fecha_fin = (string)$request->input("fecha_fin", "");
         $modelo = (string)$request->input("modelo", "");
         $usuario = (string)$request->input("usuario", "");
-        $orderByCol = $request->orderByCol;
-        $desc = $request->desc;
 
         $columnsSerachLike = [
             "productos.codigo",
             "productos.nombre",
+            "productos.marca",
             "productos.precio",
             "productos.talla",
             "ventas.id",
@@ -52,19 +50,45 @@ class VentaController extends Controller
         ];
         $columnsFilter = [];
         $columnsBetweenFilter = [];
-        $arrayOrderBy = [];
-        if ($orderByCol && $desc) {
-            $arrayOrderBy = [
-                [$orderByCol, $desc]
-            ];
-        }
 
-        $ventas = $this->ventaService->listadoPaginadoHistorial($perPage, $page, $search, $columnsSerachLike, $columnsFilter, $columnsBetweenFilter, $arrayOrderBy, $fecha_ini, $fecha_fin, $modelo, $usuario);
+        $ventas = $this->ventaService->listadoPaginadoHistorial($search, $columnsSerachLike, $columnsFilter, $columnsBetweenFilter, $fecha_ini, $fecha_fin, $modelo, $usuario);
         return response()->JSON([
-            "data" => $ventas->items(),
-            "total" => $ventas->total(),
-            "lastPage" => $ventas->lastPage()
+            "registros" => $ventas
         ]);
+    }
+
+    public function exportarPDF(Request $request)
+    {
+        $search = (string)$request->input("search", "");
+        $fecha_ini = (string)$request->input("fecha_ini", "");
+        $fecha_fin = (string)$request->input("fecha_fin", "");
+        $modelo = (string)$request->input("modelo", "");
+        $usuario = (string)$request->input("usuario", "");
+
+        $columnsSerachLike = [
+            "productos.codigo",
+            "productos.nombre",
+            "productos.marca",
+            "productos.precio",
+            "productos.talla",
+            "ventas.id",
+            "ventas.tipo_pago",
+        ];
+        $columnsFilter = [];
+        $columnsBetweenFilter = [];
+
+        $ventas = $this->ventaService->listadoPaginadoHistorial($search, $columnsSerachLike, $columnsFilter, $columnsBetweenFilter, $fecha_ini, $fecha_fin, $modelo, $usuario);
+        $pdf = PDF::loadView('reportes.historialVentas', compact('ventas'))->setPaper('letter', 'landscape');
+
+        // ENUMERAR LAS PÁGINAS USANDO CANVAS
+        $pdf->output();
+        $dom_pdf = $pdf->getDomPDF();
+        $canvas = $dom_pdf->get_canvas();
+        $alto = $canvas->get_height();
+        $ancho = $canvas->get_width();
+        $canvas->page_text($ancho - 90, $alto - 25, "Página {PAGE_NUM} de {PAGE_COUNT}", null, 9, array(0, 0, 0));
+
+        return $pdf->stream('historialVentas.pdf');
     }
 
     /**

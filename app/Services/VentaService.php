@@ -80,18 +80,15 @@ class VentaService
     }
 
     public function listadoPaginadoHistorial(
-        int $length,
-        int $page,
         string $search,
         array $columnsSerachLike = [],
         array $columnsFilter = [],
         array $columnsBetweenFilter = [],
-        array $orderBy = [],
         $fecha_ini = null,
         $fecha_fin = null,
         $modelo = "",
         $usuario = ""
-    ): LengthAwarePaginator {
+    ) {
 
         $ventas = DetalleVenta::with(["venta.user", "producto"])
             ->select(
@@ -143,14 +140,7 @@ class VentaService
             $ventas->where("users.usuario", "LIKE", "%$usuario%");
         }
 
-        // Ordenamiento
-        foreach ($orderBy as $value) {
-            if (isset($value[0], $value[1])) {
-                $ventas->orderBy($value[0], $value[1]);
-            }
-        }
-
-        return $ventas->paginate($length, ['*'], 'page', $page);
+        return $ventas->get();
     }
 
     /**

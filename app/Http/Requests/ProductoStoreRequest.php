@@ -23,6 +23,7 @@ class ProductoStoreRequest extends FormRequest
     {
         return [
             // "nombre" => "required|unique:productos,nombre",
+            "fardo_id" => "required",
             "nombre" => "required",
             "foto" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:8048",
             "marca" => "nullable",
@@ -35,6 +36,7 @@ class ProductoStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
+            "fardo_id.required" => "Este campo es obligatorio",
             "nombre.required" => "El nombre es obligatorio",
             "nombre.unique" => "El nombre ya existe",
             "foto.required" => "La foto es obligatoria",

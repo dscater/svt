@@ -47,3 +47,11 @@ form .v-input.v-input--error {
 .form-floating input::placeholder {
     color: transparent;
 }
+
+#app tr.bg-danger:hover td {
+    background-color: var(--danger) !important;
+}
+
+#app tr.bg-warning:hover td {
+    background-color: var(--warning) !important;
+}

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\DetalleVenta;
+use App\Models\Fardo;
 use App\Models\Producto;
 use App\Services\HistorialAccionService;
 use App\Models\Venta;
@@ -13,12 +14,13 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class VentaService
 {
 
-    public function __construct(private  CargarArchivoService $cargarArchivoService) {}
+    public function __construct(private  CargarArchivoService $cargarArchivoService, private FardoService $fardo_service) {}
 
     public function listado(): Collection
     {
@@ -37,33 +39,29 @@ class VentaService
      */
     public function listadoPaginado(int $length, int $page, string $search, array $columnsSerachLike = [], array $columnsFilter = [], array $columnsBetweenFilter = [], array $orderBy = []): LengthAwarePaginator
     {
-        $ventas = DetalleVenta::with(["venta", "producto"])
+        $ventas = DetalleVenta::with(["venta", "producto", "fardo"])
             ->whereHas("venta", function ($query) {
                 $query->where("status", 1);
-            })
-            ->join("ventas", "ventas.id", "detalle_ventas.venta_id")
-            ->join("productos", "productos.id", "detalle_ventas.producto_id");
+            });
 
-        // Filtros exactos
-        foreach ($columnsFilter as $key => $value) {
-            if (!is_null($value)) {
-                $ventas->where("$key", $value);
-            }
-        }
-
-        // Filtros por rango
-        foreach ($columnsBetweenFilter as $key => $value) {
-            if (isset($value[0], $value[1])) {
-                $ventas->whereBetween("$key", $value);
-            }
-        }
-
-        // Búsqueda en múltiples columnas con LIKE
-        if (!empty($search) && !empty($columnsSerachLike)) {
-            $ventas->where(function ($query) use ($search, $columnsSerachLike) {
-                foreach ($columnsSerachLike as $col) {
-                    $query->orWhere("$col", "LIKE", "%$search%");
-                }
+        if ($search) {
+            $ventas->whereHas("producto", function ($query) use ($search) {
+                $query->where("modelo", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("producto", function ($query) use ($search) {
+                $query->where("codigo", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("fardo", function ($query) use ($search) {
+                $query->where("codigo_barras", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("producto", function ($query) use ($search) {
+                $query->where("marca", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("producto", function ($query) use ($search) {
+                $query->where("talla", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("venta", function ($query) use ($search) {
+                $query->where("tipo_pago", $search);
             });
         }
 
@@ -87,23 +85,18 @@ class VentaService
         $fecha_ini = null,
         $fecha_fin = null,
         $modelo = "",
+        $codigo = "",
         $usuario = ""
     ) {
 
         $ventas = DetalleVenta::with(["venta.user", "producto"])
             ->select(
                 "detalle_ventas.*",
-                "ventas.fecha",
-                "productos.nombre as producto_nombre",
-                "users.usuario",
                 DB::raw("ROW_NUMBER() OVER (ORDER BY detalle_ventas.id DESC) as nro_fila")
             )
             ->whereHas("venta", function ($query) {
                 $query->where("status", 1);
-            })
-            ->join("ventas", "ventas.id", "detalle_ventas.venta_id")
-            ->join("users", "users.id", "ventas.user_id")
-            ->join("productos", "productos.id", "detalle_ventas.producto_id");
+            });
 
         // Filtros exactos
         foreach ($columnsFilter as $key => $value) {
@@ -119,25 +112,49 @@ class VentaService
             }
         }
 
-        // Búsqueda LIKE
-        if (!empty($search) && !empty($columnsSerachLike)) {
-            $ventas->where(function ($query) use ($search, $columnsSerachLike) {
-                foreach ($columnsSerachLike as $col) {
-                    $query->orWhere($col, "LIKE", "%$search%");
-                }
+        if ($search) {
+            $ventas->whereHas("producto", function ($query) use ($search) {
+                $query->where("modelo", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("producto", function ($query) use ($search) {
+                $query->where("codigo", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("fardo", function ($query) use ($search) {
+                $query->where("codigo_barras", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("producto", function ($query) use ($search) {
+                $query->where("marca", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("producto", function ($query) use ($search) {
+                $query->where("talla", "LIKE", "%$search%");
+            });
+            $ventas->orWhereHas("venta", function ($query) use ($search) {
+                $query->where("tipo_pago", $search);
             });
         }
 
         if ($fecha_ini && $fecha_fin) {
-            $ventas->whereBetween("ventas.fecha", [$fecha_ini, $fecha_fin]);
+            $ventas->whereHas("venta", function ($q) use ($fecha_ini, $fecha_fin) {
+                $q->whereBetween("fecha", [$fecha_ini, $fecha_fin]);
+            });
         }
 
         if ($modelo) {
-            $ventas->where("productos.modelo", "LIKE", "%$modelo%");
+            $ventas->whereHas("producto", function ($query) use ($modelo) {
+                $query->where("modelo", "LIKE", "%$modelo%");
+            });
+        }
+
+        if ($codigo) {
+            $ventas->whereHas("producto", function ($query) use ($codigo) {
+                $query->where("codigo", "LIKE", "%$codigo%");
+            });
         }
 
         if ($usuario) {
-            $ventas->where("users.usuario", "LIKE", "%$usuario%");
+            $ventas->whereHas("user", function ($q) use ($usuario) {
+                $q->where("usuario", "LIKE", "%$usuario%");
+            });
         }
 
         return $ventas->get();
@@ -159,14 +176,23 @@ class VentaService
         ]);
 
         foreach ($datos["detalle_ventas"] as $item) {
-            $venta->detalle_ventas()->create([
-                "producto_id" => $item["producto_id"],
+            $venta_detalle = $venta->detalle_ventas()->create([
+                "modulo" => $item["modulo"],
+                "registro_id" => $item["registro_id"],
             ]);
 
-            // cambiar estado del producto
-            $producto = Producto::findOrFail($item["producto_id"]);
-            $producto->status = 2;
-            $producto->save();
+            if ($venta_detalle->modulo == "Producto") {
+                // cambiar estado del producto
+                $producto = Producto::findOrFail($item["registro_id"]);
+                $producto->status = 2;
+                $producto->save();
+                // descontar stock fardo
+                $this->fardo_service->reduceStock($producto->fardo_id);
+            } else {
+                $fardo = Fardo::findOrFail($item["registro_id"]);
+                $fardo->status = 2;
+                $fardo->save();
+            }
         }
 
         return $venta;
@@ -206,9 +232,18 @@ class VentaService
     public function eliminar(Venta $venta): bool|Exception
     {
         foreach ($venta->detalle_ventas as $item) {
-            $producto = Producto::findOrFail($item->producto_id);
-            $producto->status = 1;
-            $producto->save();
+            if ($item->modulo == "Producto") {
+                // cambiar estado del producto
+                $producto = Producto::findOrFail($item["registro_id"]);
+                $producto->status = 1;
+                $producto->save();
+                // incrementar stock fardo
+                $this->fardo_service->incrementaStock($producto->fardo_id);
+            } else {
+                $fardo = Fardo::findOrFail($item["registro_id"]);
+                $fardo->status = 1;
+                $fardo->save();
+            }
         }
 
         $venta->status = 0;

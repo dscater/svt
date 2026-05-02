@@ -107,6 +107,10 @@ const updateDatatable = async () => {
     }
 };
 
+const ticket = (item) => {
+    window.open(route("ventas.ticket", item.venta_id), "_blank");
+};
+
 const eliminarVenta = (item) => {
     Swal.fire({
         title: "¿Quierés anular este registro?",
@@ -223,26 +227,28 @@ const eliminarVenta = (item) => {
                             :header-class="'bg__primary'"
                             fixed-header
                         >
-                            <template #codigo="{ item }">
-                                <el-tooltip
-                                    class="box-item"
-                                    effect="dark"
-                                    content="Imprimir"
-                                    placement="left-start"
-                                >
-                                    <button
-                                        class="btn bg1"
-                                        @click="imprimirBarras(item.id)"
-                                    >
-                                        {{ item.codigo }}
-                                        <i
-                                            class="fa fa-external-link-alt"
-                                        ></i></button
-                                ></el-tooltip>
+                            <template #[`producto.codigo`]="{ item }">
+                                {{
+                                    item.item.codigo
+                                        ? item.item.codigo
+                                        : item.item.codigo_barras
+                                }}
+                            </template>
+                            <template #[`producto.nombre`]="{ item }">
+                                {{ item.item.nombre ? item.item.nombre : "" }}
+                            </template>
+                            <template #[`producto.precio`]="{ item }">
+                                {{ item.item.precio ? item.item.precio : "" }}
                             </template>
                             <template #foto="{ item }">
                                 <img
+                                    v-if="item.modulo == 'Producto'"
                                     :src="item.producto.url_foto"
+                                    width="90px"
+                                />
+                                <img
+                                    v-if="item.modulo == 'Fardo'"
+                                    :src="item.fardo.url_foto"
                                     width="90px"
                                 />
                             </template>
@@ -272,6 +278,28 @@ const eliminarVenta = (item) => {
                                             <i class="fa fa-pen"></i></button
                                     ></el-tooltip>
                                 </template> -->
+
+                                <template
+                                    v-if="
+                                        props_page.auth?.user.permisos == '*' ||
+                                        props_page.auth?.user.permisos.includes(
+                                            'ventas.ticket',
+                                        )
+                                    "
+                                >
+                                    <el-tooltip
+                                        class="box-item"
+                                        effect="dark"
+                                        content="Ticket"
+                                        placement="left-start"
+                                    >
+                                        <button
+                                            class="btn btn-dark"
+                                            @click="ticket(item)"
+                                        >
+                                            <i class="fa fa-print"></i></button
+                                    ></el-tooltip>
+                                </template>
 
                                 <template
                                     v-if="

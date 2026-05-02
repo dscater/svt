@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
             $table->string("codigo", 255)->unique();
+            $table->unsignedBigInteger("fardo_id");
             $table->string("nombre");
             $table->string("foto", 255)->nullable();
             $table->string("marca", 255)->nullable();
@@ -24,6 +25,8 @@ return new class extends Migration
             $table->time("hora_registro")->nullable();
             $table->integer("status")->default(1); // 0: eliminado, 1: activo, 2: vendido 
             $table->timestamps();
+
+            $table->foreign("fardo_id")->on("fardos")->references("id");
         });
     }
 

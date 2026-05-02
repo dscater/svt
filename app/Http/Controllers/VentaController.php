@@ -39,15 +39,7 @@ class VentaController extends Controller
         $modelo = (string)$request->input("modelo", "");
         $usuario = (string)$request->input("usuario", "");
 
-        $columnsSerachLike = [
-            "productos.codigo",
-            "productos.nombre",
-            "productos.marca",
-            "productos.precio",
-            "productos.talla",
-            "ventas.id",
-            "ventas.tipo_pago",
-        ];
+        $columnsSerachLike = [];
         $columnsFilter = [];
         $columnsBetweenFilter = [];
 
@@ -57,6 +49,23 @@ class VentaController extends Controller
         ]);
     }
 
+    public function ticket(Venta $venta)
+    {
+        $items = $venta->detalle_ventas; // relación
+
+        $baseHeight = 200;
+        $rowHeight = 20;   // alto por producto 
+
+        $height = $baseHeight + (count($items) * $rowHeight);
+
+        // 80mm = 226.77 pt
+        $customPaper = [0, 0, 226.77, $height];
+
+        $pdf = PDF::loadView('reportes.ticket', compact('venta'))
+            ->setPaper($customPaper);
+
+        return $pdf->stream('ticket.pdf');
+    }
     public function exportarPDF(Request $request)
     {
         $search = (string)$request->input("search", "");
@@ -65,15 +74,7 @@ class VentaController extends Controller
         $modelo = (string)$request->input("modelo", "");
         $usuario = (string)$request->input("usuario", "");
 
-        $columnsSerachLike = [
-            "productos.codigo",
-            "productos.nombre",
-            "productos.marca",
-            "productos.precio",
-            "productos.talla",
-            "ventas.id",
-            "ventas.tipo_pago",
-        ];
+        $columnsSerachLike = [];
         $columnsFilter = [];
         $columnsBetweenFilter = [];
 
@@ -175,9 +176,10 @@ class VentaController extends Controller
         DB::beginTransaction();
         try {
             // crear el Venta
-            $this->ventaService->crear($request->validated());
+            $venta = $this->ventaService->crear($request->validated());
             DB::commit();
-            return redirect()->route("ventas.index")->with("bien", "Registro realizado");
+            return redirect()->route("ventas.index")->with("bien", "Registro realizado")
+                ->with("venta_id", $venta->id);
         } catch (\Exception $e) {
             DB::rollBack();
             throw ValidationException::withMessages([

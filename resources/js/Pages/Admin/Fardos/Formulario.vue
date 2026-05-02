@@ -40,8 +40,8 @@ function cargaArchivo(e, key) {
 
 const tituloDialog = computed(() => {
     return form.id == 0
-        ? `<i class="fa fa-plus"></i> Nuevo Producto`
-        : `<i class="fa fa-edit"></i> Editar Producto`;
+        ? `<i class="fa fa-plus"></i> Nuevo Fardo`
+        : `<i class="fa fa-edit"></i> Editar Fardo`;
 });
 
 const textBtn = computed(() => {
@@ -57,9 +57,7 @@ const textBtn = computed(() => {
 const enviarFormulario = () => {
     enviando.value = true;
     let url =
-        form.id == 0
-            ? route("productos.store")
-            : route("productos.update", form.id);
+        form.id == 0 ? route("fardos.store") : route("fardos.update", form.id);
 
     form.post(url, {
         preserveScroll: true,
@@ -140,22 +138,7 @@ const cerrarFormulario = () => {
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
 };
 
-const listFardos = ref([]);
-const cargarFardos = () => {
-    axios
-        .get(route("fardos.listado"), {
-            params: {
-                tipo_venta: "POR UNIDADES",
-            },
-        })
-        .then((response) => {
-            listFardos.value = response.data.fardos;
-        });
-};
-
-onMounted(() => {
-    cargarFardos();
-});
+onMounted(() => {});
 </script>
 
 <template>
@@ -185,52 +168,7 @@ onMounted(() => {
                 </p>
                 <div class="row">
                     <div class="col-md-4 mt-2">
-                        <label class="required">Seleccionar Fardo</label>
-                        <el-select
-                            v-model="form.fardo_id"
-                            placeholder="Fardo"
-                            no-data-text="Sin datos"
-                            no-match-text="Sin resultados"
-                            filterable
-                        >
-                            <el-option
-                                v-for="item in listFardos"
-                                :key="item.id"
-                                :value="item.id"
-                                :label="`${item.id}${item.nombre ? ' - ' + item.nombre : ''}`"
-                            ></el-option>
-                        </el-select>
-                        <ul
-                            v-if="form.errors?.fardo_id"
-                            class="d-block text-danger list-unstyled"
-                        >
-                            <li class="parsley-required">
-                                {{ form.errors?.fardo_id }}
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4 mt-2">
-                        <label class="required">Foto</label>
-                        <input
-                            type="file"
-                            class="form-control"
-                            :class="{
-                                'parsley-error': form.errors?.foto,
-                            }"
-                            ref="archivo"
-                            @change="cargarArchivo($event, 'foto')"
-                        />
-                        <ul
-                            v-if="form.errors?.foto"
-                            class="d-block text-danger list-unstyled"
-                        >
-                            <li class="parsley-required">
-                                {{ form.errors?.foto }}
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4 mt-2">
-                        <label class="required">Nombre de Producto</label>
+                        <label class="">Nombre de Fardo</label>
                         <el-input
                             type="text"
                             :class="{
@@ -249,47 +187,38 @@ onMounted(() => {
                         </ul>
                     </div>
                     <div class="col-md-4 mt-2">
-                        <label class="">Marca</label>
-                        <el-input
-                            type="text"
-                            :class="{
-                                'parsley-error': form.errors?.marca,
-                            }"
-                            v-model="form.marca"
-                            autosize
-                        ></el-input>
+                        <label class="required">Tipo de Venta</label>
+                        <el-radio-group v-model="form.tipo_venta">
+                            <el-radio :value="'POR UNIDADES'" size="large"
+                                ><i class="fa fa-boxes"></i> POR
+                                UNIDADES</el-radio
+                            >
+                            <el-radio :value="'COMPLETO'" size="large"
+                                ><i class="fa fa-box"></i> COMPLETO</el-radio
+                            >
+                        </el-radio-group>
                         <ul
-                            v-if="form.errors?.marca"
+                            v-if="form.errors?.tipo_venta"
                             class="d-block text-danger list-unstyled"
                         >
                             <li class="parsley-required">
-                                {{ form.errors?.marca }}
+                                {{ form.errors?.tipo_venta }}
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-4 mt-2">
-                        <label class="">Modelo</label>
-                        <el-input
-                            type="text"
+                    <div
+                        class="col-md-4 mt-2"
+                        v-if="form.tipo_venta == 'COMPLETO'"
+                    >
+                        <label
                             :class="{
-                                'parsley-error': form.errors?.modelo,
+                                required: form.tipo_venta == 'COMPLETO',
                             }"
-                            v-model="form.modelo"
-                            autosize
-                        ></el-input>
-                        <ul
-                            v-if="form.errors?.modelo"
-                            class="d-block text-danger list-unstyled"
+                            >Precio del Fardo</label
                         >
-                            <li class="parsley-required">
-                                {{ form.errors?.modelo }}
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4 mt-2">
-                        <label class="">Precio</label>
                         <input
                             type="number"
+                            step="0.01"
                             class="form-control"
                             :class="{
                                 'parsley-error': form.errors?.precio,
@@ -306,22 +235,30 @@ onMounted(() => {
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-4 mt-2">
-                        <label class="">Talla</label>
+                    <div
+                        class="col-md-4 mt-2"
+                        v-if="form.tipo_venta == 'COMPLETO'"
+                    >
+                        <label
+                            :class="{
+                                required: form.tipo_venta == 'COMPLETO',
+                            }"
+                            >Código de Barras</label
+                        >
                         <el-input
                             type="text"
                             :class="{
-                                'parsley-error': form.errors?.talla,
+                                'parsley-error': form.errors?.codigo_barras,
                             }"
-                            v-model="form.talla"
+                            v-model="form.codigo_barras"
                             autosize
                         ></el-input>
                         <ul
-                            v-if="form.errors?.talla"
+                            v-if="form.errors?.codigo_barras"
                             class="d-block text-danger list-unstyled"
                         >
                             <li class="parsley-required">
-                                {{ form.errors?.talla }}
+                                {{ form.errors?.codigo_barras }}
                             </li>
                         </ul>
                     </div>

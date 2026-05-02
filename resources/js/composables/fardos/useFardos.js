@@ -1,27 +1,27 @@
 import { useForm } from "@inertiajs/vue3";
-export const useProductos = () => {
+export const useFardos = () => {
     const initialState = {
         id: 0,
-        fardo_id: "",
         nombre: "",
-        foto: "",
-        marca: "",
-        modelo: "",
+        tipo_venta: "POR UNIDADES",
         precio: 0,
-        talla: "",
+        codigo_barras: "",
+        stock: "",
+        fecha_registro: "",
+        hora_registro: "",
         _method: "POST",
     };
 
     const form = useForm({ ...initialState });
 
-    const setProducto = (item = null) => {
+    const setFardo = (item = null) => {
         form.clearErrors();
         form.reset();
         Object.assign(form, item);
         form._method = "PUT";
     };
 
-    const limpiarProducto = () => {
+    const limpiarFardo = () => {
         form.clearErrors();
         form.reset();
         form.defaults({ ...initialState });
@@ -29,7 +29,7 @@ export const useProductos = () => {
 
     return {
         form,
-        setProducto,
-        limpiarProducto,
+        setFardo,
+        limpiarFardo,
     };
 };

@@ -63,6 +63,14 @@ const enviarFormulario = () => {
                     confirmButton: "btn-alert-success",
                 },
             });
+
+            if (response.props.flash.venta_id) {
+                window.open(
+                    route("ventas.ticket", response.props.flash.venta_id),
+                    "_blank",
+                );
+            }
+
             form.reset();
             limpiarVenta();
         },
@@ -124,19 +132,24 @@ const agregarProducto = () => {
         .then((response) => {
             // verificar que no exista ya en la lista
             const existe = form.detalle_ventas.some(
-                (item) => item.producto_id === response.data.id,
+                (item) =>
+                    item.registro_id === response.data.producto.id &&
+                    item.modulo === response.data.modulo,
             );
 
             if (!existe) {
                 form.detalle_ventas.push({
-                    producto_id: response.data.id,
-                    producto: response.data,
+                    modulo: response.data.modulo,
+                    registro_id: response.data.producto.id,
+                    producto: response.data.producto,
                 });
                 toast.success(
-                    `Producto ${response.data.nombre} cargado correctamente`,
+                    `Producto ${response.data.producto.nombre} cargado correctamente`,
                 );
             } else {
-                toast.info(`Producto ${response.data.nombre} ya fue agregado`);
+                toast.info(
+                    `Producto ${response.data.producto.nombre} ya fue agregado`,
+                );
             }
         })
         .catch((error) => {

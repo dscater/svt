@@ -182,12 +182,12 @@
                 <tr>
                     <td class="centreado">{{ $cont++ }}</td>
                     <td>{{ $item->venta->id }}</td>
-                    <td>{{ $item->producto->codigo }}</td>
-                    <td>{{ $item->producto->nombre }}</td>
-                    <td>{{ $item->producto->marca }}</td>
-                    <td>{{ $item->producto->modelo }}</td>
-                    <td>{{ $item->producto->precio }}</td>
-                    <td>{{ $item->producto->talla }}</td>
+                    <td>{{ $item->item->codigo ? $item->item->codigo : $item->item->codigo_barras }}</td>
+                    <td>{{ $item->item->nombre }}</td>
+                    <td>{{ $item->item->marca }}</td>
+                    <td>{{ $item->item->modelo }}</td>
+                    <td>{{ $item->item->precio }}</td>
+                    <td>{{ $item->item->talla }}</td>
                     <td>{{ $item->venta->tipo_pago }}</td>
                     <td>{{ $item->venta->fecha_hora }}</td>
                     <td class="centreado">{{ $item->venta->user->usuario }}/{{ $item->venta->user->tipo }}</td>

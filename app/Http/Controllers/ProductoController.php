@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductoStoreRequest;
 use App\Http\Requests\ProductoUpdateRequest;
+use App\Models\Fardo;
 use App\Models\HistorialAccion;
 use App\Models\Modulo;
 use App\Models\Permiso;
@@ -158,19 +159,37 @@ class ProductoController extends Controller
             $codigo = $request->codigo;
             $producto = Producto::where("codigo", $codigo)->get()->first();
 
-            if (!$producto) {
-                throw new Exception("No hay ningún producto con ese código");
+            $registro = null;
+            if (!$producto || $producto->status == 0 || $producto->status == 2) {
+                // buscar fardo
+                $fardo = Fardo::where("codigo_barras", $codigo)->first();
+                if ($fardo && $fardo->status == 1) {
+                    $registro = [
+                        "modulo" => "Fardo",
+                        "producto" => [
+                            "id" => $fardo->id,
+                            "codigo" => $fardo->codigo_barras,
+                            "nombre" => $fardo->nombre ?? $fardo->id,
+                            "marca" => "",
+                            "modelo" => "",
+                            "talla" => "",
+                            "precio" => $fardo->precio,
+                            "url_foto" => $fardo->url_foto,
+                        ],
+                    ];
+                }
+            } else {
+                $registro = [
+                    "modulo" => "Producto",
+                    "producto" => $producto
+                ];
             }
 
-            if ($producto->status == 0) {
-                throw new Exception("No se encontró el producto");
+            if (!$registro) {
+                throw new Exception("No se encontró ningún producto con ese código");
             }
 
-            if ($producto->status == 2) {
-                throw new Exception("El producto ya fue vendido");
-            }
-
-            return response()->JSON($producto);
+            return response()->JSON($registro);
         } catch (\Exception $e) {
             Log::debug("BB");
             throw ValidationException::withMessages([

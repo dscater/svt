@@ -5,19 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Producto extends Model
+class Fardo extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        "codigo",
-        "fardo_id",
         "nombre",
-        "foto",
-        "marca",
-        "modelo",
+        "tipo_venta", // POR UNIDADES | COMPLETO
         "precio",
-        "talla",
+        "codigo_barras",
+        "stock",
         "fecha_registro",
         "hora_registro",
         "status",
@@ -27,10 +24,7 @@ class Producto extends Model
 
     public function getUrlFotoAttribute()
     {
-        if ($this->foto) {
-            return asset("imgs/productos/" . $this->foto);
-        }
-        return null;
+        return asset("imgs/productos/producto_default.png");
     }
 
     public function getFechaRegistroTAttribute()

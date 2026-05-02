@@ -21,6 +21,18 @@ class PermisoService
             "usuarios.destroy",
             "usuarios.password",
 
+            "fardos.paginado",
+            "fardos.index",
+            "fardos.listado",
+            "fardos.create",
+            "fardos.store",
+            "fardos.edit",
+            "fardos.show",
+            "fardos.update",
+            "fardos.destroy",
+            "fardos.barras",
+            "fardos.byCodigo",
+
             "productos.paginado",
             "productos.index",
             "productos.listado",
@@ -45,6 +57,7 @@ class PermisoService
             "ventas.historial",
             "ventas.paginadoHistorial",
             "ventas.exportarPDF",
+            "ventas.ticket",
 
             "configuracions.index",
             "configuracions.create",
@@ -66,6 +79,7 @@ class PermisoService
 
         ],
         "VENDEDOR" => [
+            "productos.byCodigo",
 
             "ventas.paginado",
             "ventas.index",
@@ -76,6 +90,7 @@ class PermisoService
             "ventas.historial",
             "ventas.paginadoHistorial",
             "ventas.exportarPDF",
+            "ventas.ticket",
 
             "qrs.index",
             "qrs.getQr",

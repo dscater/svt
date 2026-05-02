@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 17-03-2026 a las 18:44:19
+-- Tiempo de generación: 02-05-2026 a las 15:54:14
 -- Versión del servidor: 8.0.30
 -- Versión de PHP: 8.2.22
 
@@ -52,7 +52,8 @@ INSERT INTO `configuracions` (`id`, `nombre_sistema`, `alias`, `logo`, `created_
 CREATE TABLE `detalle_ventas` (
   `id` bigint UNSIGNED NOT NULL,
   `venta_id` bigint UNSIGNED NOT NULL,
-  `producto_id` bigint UNSIGNED NOT NULL,
+  `modulo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `registro_id` bigint UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -61,11 +62,39 @@ CREATE TABLE `detalle_ventas` (
 -- Volcado de datos para la tabla `detalle_ventas`
 --
 
-INSERT INTO `detalle_ventas` (`id`, `venta_id`, `producto_id`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, '2026-03-16 19:40:45', '2026-03-16 19:40:45'),
-(2, 2, 2, '2026-03-16 20:41:36', '2026-03-16 20:41:36'),
-(3, 2, 3, '2026-03-16 20:41:36', '2026-03-16 20:41:36'),
-(4, 3, 4, '2026-03-16 21:10:49', '2026-03-16 21:10:49');
+INSERT INTO `detalle_ventas` (`id`, `venta_id`, `modulo`, `registro_id`, `created_at`, `updated_at`) VALUES
+(1, 4, 'Producto', 1, '2026-05-02 15:01:36', '2026-05-02 15:01:36'),
+(2, 4, 'Fardo', 2, '2026-05-02 15:01:36', '2026-05-02 15:01:36'),
+(3, 5, 'Producto', 2, '2026-05-02 15:49:34', '2026-05-02 15:49:34');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `fardos`
+--
+
+CREATE TABLE `fardos` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tipo_venta` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `precio` decimal(24,2) DEFAULT NULL,
+  `codigo_barras` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stock` int DEFAULT '0',
+  `fecha_registro` date DEFAULT NULL,
+  `hora_registro` time DEFAULT NULL,
+  `status` int NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `fardos`
+--
+
+INSERT INTO `fardos` (`id`, `nombre`, `tipo_venta`, `precio`, `codigo_barras`, `stock`, `fecha_registro`, `hora_registro`, `status`, `created_at`, `updated_at`) VALUES
+(1, NULL, 'POR UNIDADES', NULL, NULL, 2, '2026-05-02', '09:55:14', 1, '2026-05-02 13:55:14', '2026-05-02 15:50:22'),
+(2, NULL, 'COMPLETO', 2500.00, 'FARDO-001', 0, '2026-05-02', '09:57:46', 2, '2026-05-02 13:57:46', '2026-05-02 15:01:36'),
+(3, 'FARDO UNIDAD', 'POR UNIDADES', NULL, NULL, 1, '2026-05-02', '10:21:03', 1, '2026-05-02 14:21:03', '2026-05-02 14:40:11');
 
 -- --------------------------------------------------------
 
@@ -89,7 +118,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (3, '2026_03_14_150505_create_productos_table', 1),
 (4, '2026_03_14_150858_create_ventas_table', 1),
 (5, '2026_03_14_151437_create_detalle_ventas_table', 1),
-(6, '2026_03_14_151706_create_qrs_table', 1);
+(6, '2026_03_14_151706_create_qrs_table', 1),
+(7, '2026_05_02_092503_create_fardos_table', 2);
 
 -- --------------------------------------------------------
 
@@ -100,6 +130,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 CREATE TABLE `productos` (
   `id` bigint UNSIGNED NOT NULL,
   `codigo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fardo_id` bigint UNSIGNED NOT NULL,
   `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `foto` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `marca` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -117,11 +148,12 @@ CREATE TABLE `productos` (
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `codigo`, `nombre`, `foto`, `marca`, `modelo`, `precio`, `talla`, `fecha_registro`, `hora_registro`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'PROD-0001', 'PRODUCTO 1', '11773519312.png', 'MARCA 1', 'MODELO 1', 150.00, 'M', '2026-03-14', '16:06:11', 1, '2026-03-14 20:05:05', '2026-03-16 20:48:36'),
-(2, 'PROD-0002', 'PRODUCTO 2', '21773519378.jpeg', 'MARCA 2', '', 345.00, '', '2026-03-14', '16:16:18', 2, '2026-03-14 20:16:18', '2026-03-16 20:41:36'),
-(3, 'PROD-0003', 'PRODUCTO 3', '31773689518.gif', '', '', 99.50, '', '2026-03-16', '15:31:58', 2, '2026-03-16 19:31:58', '2026-03-16 20:41:36'),
-(4, 'PROD-0004', 'PRODUCTO 4', '41773695429.png', '', '', 123.00, '', '2026-03-16', '17:10:29', 2, '2026-03-16 21:10:29', '2026-03-16 21:10:49');
+INSERT INTO `productos` (`id`, `codigo`, `fardo_id`, `nombre`, `foto`, `marca`, `modelo`, `precio`, `talla`, `fecha_registro`, `hora_registro`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'PROD-0001', 1, 'PRODUCTO 1', '11777732750.jpeg', '', '', 90.00, '', '2026-05-02', '10:39:10', 2, '2026-05-02 14:39:10', '2026-05-02 15:01:36'),
+(2, 'PROD-0002', 1, 'PRODUCTO 2', '21777732798.jpg', '', '', 0.00, '', '2026-05-02', '10:39:58', 2, '2026-05-02 14:39:58', '2026-05-02 15:49:34'),
+(3, 'PROD-0003', 3, 'PROD 3', '31777732811.jpg', '', '', 126.00, '', '2026-05-02', '10:40:11', 1, '2026-05-02 14:40:11', '2026-05-02 14:40:11'),
+(4, 'PROD-0004', 1, 'PRODUCT 4', '41777737011.jpg', '', '', 123.00, '', '2026-05-02', '11:50:11', 1, '2026-05-02 15:50:11', '2026-05-02 15:50:11'),
+(5, 'PROD-0005', 1, 'PROD 6', '51777737022.jpg', '', '', 43.00, '', '2026-05-02', '11:50:22', 1, '2026-05-02 15:50:22', '2026-05-02 15:50:22');
 
 -- --------------------------------------------------------
 
@@ -190,9 +222,8 @@ CREATE TABLE `ventas` (
 --
 
 INSERT INTO `ventas` (`id`, `tipo_pago`, `user_id`, `fecha`, `hora`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'EFECTIVO', 1, '2026-03-16', '15:40:45', 0, '2026-03-16 19:40:45', '2026-03-16 20:48:36'),
-(2, 'QR', 1, '2026-03-16', '16:41:36', 1, '2026-03-16 20:41:36', '2026-03-16 20:41:36'),
-(3, 'EFECTIVO', 1, '2026-03-16', '17:10:49', 1, '2026-03-16 21:10:49', '2026-03-16 21:10:49');
+(4, 'EFECTIVO', 1, '2026-05-02', '11:01:36', 1, '2026-05-02 15:01:36', '2026-05-02 15:01:36'),
+(5, 'EFECTIVO', 1, '2026-05-02', '11:49:34', 1, '2026-05-02 15:49:34', '2026-05-02 15:49:34');
 
 --
 -- Índices para tablas volcadas
@@ -209,8 +240,13 @@ ALTER TABLE `configuracions`
 --
 ALTER TABLE `detalle_ventas`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `detalle_ventas_producto_id_foreign` (`producto_id`),
   ADD KEY `fk_venta_id` (`venta_id`);
+
+--
+-- Indices de la tabla `fardos`
+--
+ALTER TABLE `fardos`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `migrations`
@@ -223,7 +259,8 @@ ALTER TABLE `migrations`
 --
 ALTER TABLE `productos`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `productos_codigo_unique` (`codigo`);
+  ADD UNIQUE KEY `productos_codigo_unique` (`codigo`),
+  ADD KEY `fk_productos_fardo_id` (`fardo_id`);
 
 --
 -- Indices de la tabla `qrs`
@@ -258,19 +295,25 @@ ALTER TABLE `configuracions`
 -- AUTO_INCREMENT de la tabla `detalle_ventas`
 --
 ALTER TABLE `detalle_ventas`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `fardos`
+--
+ALTER TABLE `fardos`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `qrs`
@@ -288,7 +331,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas
@@ -298,8 +341,13 @@ ALTER TABLE `ventas`
 -- Filtros para la tabla `detalle_ventas`
 --
 ALTER TABLE `detalle_ventas`
-  ADD CONSTRAINT `detalle_ventas_producto_id_foreign` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`),
   ADD CONSTRAINT `fk_venta_id` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`);
+
+--
+-- Filtros para la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD CONSTRAINT `fk_productos_fardo_id` FOREIGN KEY (`fardo_id`) REFERENCES `fardos` (`id`);
 
 --
 -- Filtros para la tabla `ventas`

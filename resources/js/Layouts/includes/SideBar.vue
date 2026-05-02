@@ -149,6 +149,14 @@ onUnmounted(() => {});
                     ></ItemMenu>
                     <ItemMenu
                         v-if="
+                            permisos == '*' || permisos.includes('fardos.index')
+                        "
+                        :label="'Fardos'"
+                        :ruta="'fardos.index'"
+                        :icon="'fa fa-list'"
+                    ></ItemMenu>
+                    <ItemMenu
+                        v-if="
                             permisos == '*' ||
                             permisos.includes('usuarios.index')
                         "

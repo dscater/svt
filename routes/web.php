@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\FardoController;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\QrController;
@@ -66,6 +67,15 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
         ["index", "store"]
     );
 
+    // FARDOS
+    Route::get("fardos/barras", [FardoController::class, 'barras'])->name("fardos.barras");
+    Route::get("fardos/paginado", [FardoController::class, 'paginado'])->name("fardos.paginado");
+    Route::get("fardos/listado", [FardoController::class, 'listado'])->name("fardos.listado");
+    Route::get("fardos/getProducto/byCodigo", [FardoController::class, 'byCodigo'])->name("fardos.byCodigo");
+    Route::resource("fardos", FardoController::class)->only(
+        ["index", "store", "edit", "show", "update", "destroy"]
+    );
+
     // PRODUCTOS
     Route::get("productos/barras", [ProductoController::class, 'barras'])->name("productos.barras");
     Route::get("productos/paginado", [ProductoController::class, 'paginado'])->name("productos.paginado");
@@ -76,6 +86,7 @@ Route::middleware(['auth', 'permisoUsuario'])->prefix("admin")->group(function (
     );
 
     // VENTAS
+    Route::get("ventas/imprimir/ticket/{venta}", [VentaController::class, 'ticket'])->name("ventas.ticket");
     Route::get("ventas/paginado", [VentaController::class, 'paginado'])->name("ventas.paginado");
     Route::get("ventas/listado", [VentaController::class, 'listado'])->name("ventas.listado");
     Route::get("ventas/paginadoHistorial", [VentaController::class, 'paginadoHistorial'])->name("ventas.paginadoHistorial");

@@ -22,20 +22,27 @@ class ProductoUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             // "nombre" => "required|unique:productos,nombre," . $this->producto->id,
+            "fardo_id" => "required",
             "nombre" => "required",
-            "foto" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8048",
             "marca" => "nullable",
             "modelo" => "nullable",
             "precio" => "nullable|decimal:0,2",
             "talla" => "nullable",
         ];
+
+        if (!is_string($this->foto)) {
+            $rules["foto"] = "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:8048";
+        }
+
+        return $rules;
     }
 
     public function messages(): array
     {
         return [
+            "fardo_id.required" => "Este campo es obligatorio",
             "nombre.required" => "El nombre es obligatorio",
             "nombre.unique" => "El nombre ya existe",
             "foto.required" => "La foto es obligatoria",

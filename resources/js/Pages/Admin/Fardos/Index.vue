@@ -2,7 +2,7 @@
 import Content from "@/Components/Content.vue";
 import MiTable from "@/Components/MiTable.vue";
 import { Head, Link, router, usePage } from "@inertiajs/vue3";
-import { useProductos } from "@/composables/productos/useProductos";
+import { useFardos } from "@/composables/fardos/useFardos";
 import { useAxios } from "@/composables/axios/useAxios";
 import { ref, onMounted, onBeforeMount } from "vue";
 import { useAppStore } from "@/stores/aplicacion/appStore";
@@ -20,26 +20,25 @@ onMounted(() => {
     appStore.stopLoading();
 });
 
-const { setProducto, limpiarProducto, form } = useProductos();
+const { setFardo, limpiarFardo, form } = useFardos();
 const { axiosDelete } = useAxios();
 
 const miTable = ref(null);
 const headers = [
     {
-        label: "NRO.",
+        label: "CÓDIGO.",
         key: "id",
         sortable: true,
         width: "4%",
-    },
-    {
-        label: "FARDO",
-        key: "fardo_id",
-        sortable: true,
-    },
-    {
-        label: "CÓDIGO",
-        key: "codigo",
-        sortable: true,
+        classRow: (item) => {
+            if (item.stock < 5) {
+                return "bg-danger";
+            }
+            if (item.stock < 10) {
+                return "bg-warning";
+            }
+            return "";
+        },
     },
     {
         label: "NOMBRE",
@@ -47,13 +46,8 @@ const headers = [
         sortable: true,
     },
     {
-        label: "MARCA",
-        key: "marca",
-        sortable: true,
-    },
-    {
-        label: "MODELO",
-        key: "modelo",
+        label: "TIPO DE VENTA",
+        key: "tipo_venta",
         sortable: true,
     },
     {
@@ -62,13 +56,13 @@ const headers = [
         sortable: true,
     },
     {
-        label: "TALLA",
-        key: "talla",
+        label: "CÓDIGO BARRAS",
+        key: "codigo_barras",
         sortable: true,
     },
     {
-        label: "FOTO",
-        key: "foto",
+        label: "STOCK",
+        key: "stock",
         sortable: true,
     },
     {
@@ -92,12 +86,12 @@ const multiSearch = ref({
 const muestra_formulario = ref(false);
 
 const agregarRegistro = () => {
-    limpiarProducto();
+    limpiarFardo();
     muestra_formulario.value = true;
 };
 
 const imprimirBarras = (id) => {
-    const url = route("productos.barras") + "?producto_id=" + id;
+    const url = route("fardos.barras") + "?fardo_id=" + id;
 
     window.open(url, "_blank");
 };
@@ -105,15 +99,15 @@ const imprimirBarras = (id) => {
 const updateDatatable = async () => {
     if (miTable.value) {
         await miTable.value.cargarDatos();
-        limpiarProducto();
+        limpiarFardo();
         muestra_formulario.value = false;
     }
 };
 
-const eliminarProducto = (item) => {
+const eliminarFardo = (item) => {
     Swal.fire({
         title: "¿Quierés eliminar este registro?",
-        html: `<strong>${item.nombre}</strong>`,
+        html: `<strong>Código: ${item.id}</strong>`,
         showCancelButton: true,
         confirmButtonText: "Si, eliminar",
         cancelButtonText: "No, cancelar",
@@ -124,9 +118,7 @@ const eliminarProducto = (item) => {
     }).then(async (result) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
-            let respuesta = await axiosDelete(
-                route("productos.destroy", item.id),
-            );
+            let respuesta = await axiosDelete(route("fardos.destroy", item.id));
             if (respuesta && respuesta.sw) {
                 updateDatatable();
             }
@@ -135,12 +127,12 @@ const eliminarProducto = (item) => {
 };
 </script>
 <template>
-    <Head title="Productos"></Head>
+    <Head title="Fardos"></Head>
     <Content>
         <template #header>
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Productos</h1>
+                    <h1 class="m-0">Fardos</h1>
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-6">
@@ -148,7 +140,7 @@ const eliminarProducto = (item) => {
                         <li class="breadcrumb-item">
                             <Link :href="route('inicio')">Inicio</Link>
                         </li>
-                        <li class="breadcrumb-item active">Productos</li>
+                        <li class="breadcrumb-item active">Fardos</li>
                     </ol>
                 </div>
                 <!-- /.col -->
@@ -163,20 +155,20 @@ const eliminarProducto = (item) => {
                             v-if="
                                 props_page.auth?.user.permisos == '*' ||
                                 props_page.auth?.user.permisos.includes(
-                                    'productos.create',
+                                    'fardos.create',
                                 )
                             "
                             type="button"
                             class="btn btn-success"
                             @click="agregarRegistro"
                         >
-                            <i class="fa fa-plus"></i> Nuevo Producto
+                            <i class="fa fa-plus"></i> Nuevo Fardo
                         </button>
                         <button
                             v-if="
                                 props_page.auth?.user.permisos == '*' ||
                                 props_page.auth?.user.permisos.includes(
-                                    'productos.barras',
+                                    'fardos.barras',
                                 )
                             "
                             class="btn bg1 ml-1"
@@ -218,7 +210,7 @@ const eliminarProducto = (item) => {
                             ref="miTable"
                             :cols="headers"
                             :api="true"
-                            :url="route('productos.paginado')"
+                            :url="route('fardos.paginado')"
                             :numPages="5"
                             :multiSearch="multiSearch"
                             :syncOrderBy="'id'"
@@ -227,32 +219,36 @@ const eliminarProducto = (item) => {
                             :header-class="'bg__primary'"
                             fixed-header
                         >
-                            <template #codigo="{ item }">
-                                <el-tooltip
-                                    class="box-item"
-                                    effect="dark"
-                                    content="Imprimir"
-                                    placement="left-start"
-                                >
-                                    <button
-                                        class="btn bg1"
-                                        @click="imprimirBarras(item.id)"
-                                    >
-                                        {{ item.codigo }}
-                                        <i
-                                            class="fa fa-external-link-alt"
-                                        ></i></button
-                                ></el-tooltip>
+                            <template #stock="{ item }">
+                                <div v-if="item.tipo_venta == 'POR UNIDADES'">
+                                    <span>{{ item.stock }}</span>
+                                </div>
                             </template>
-                            <template #foto="{ item }">
-                                <img :src="item.url_foto" width="90px" />
+                            <template #codigo_barras="{ item }">
+                                <div v-if="item.tipo_venta == 'COMPLETO'">
+                                    <el-tooltip
+                                        class="box-item"
+                                        effect="dark"
+                                        content="Imprimir"
+                                        placement="left-start"
+                                    >
+                                        <button
+                                            class="btn bg1"
+                                            @click="imprimirBarras(item.id)"
+                                        >
+                                            {{ item.codigo_barras }}
+                                            <i
+                                                class="fa fa-external-link-alt"
+                                            ></i></button
+                                    ></el-tooltip>
+                                </div>
                             </template>
                             <template #accion="{ item }">
                                 <template
                                     v-if="
                                         props_page.auth?.user.permisos == '*' ||
                                         props_page.auth?.user.permisos.includes(
-                                            'productos.edit',
+                                            'fardos.edit',
                                         )
                                     "
                                 >
@@ -265,7 +261,7 @@ const eliminarProducto = (item) => {
                                         <button
                                             class="btn btn-warning"
                                             @click="
-                                                setProducto(item);
+                                                setFardo(item);
                                                 muestra_formulario = true;
                                             "
                                         >
@@ -277,7 +273,7 @@ const eliminarProducto = (item) => {
                                     v-if="
                                         props_page.auth?.user.permisos == '*' ||
                                         props_page.auth?.user.permisos.includes(
-                                            'productos.destroy',
+                                            'fardos.destroy',
                                         )
                                     "
                                 >
@@ -289,7 +285,7 @@ const eliminarProducto = (item) => {
                                     >
                                         <button
                                             class="btn btn-danger"
-                                            @click="eliminarProducto(item)"
+                                            @click="eliminarFardo(item)"
                                         >
                                             <i
                                                 class="fa fa-trash-alt"

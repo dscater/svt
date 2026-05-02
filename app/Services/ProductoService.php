@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 class ProductoService
 {
 
-    public function __construct(private  CargarArchivoService $cargarArchivoService) {}
+    public function __construct(private  CargarArchivoService $cargarArchivoService, private FardoService $fardo_service) {}
 
     public function listado(): Collection
     {
@@ -82,6 +82,7 @@ class ProductoService
         $codigo = $this->getCodigoProducto();
 
         $producto = Producto::create([
+            "fardo_id" => $datos["fardo_id"],
             "codigo" => $codigo,
             "nombre" => mb_strtoupper($datos["nombre"]),
             "marca" => mb_strtoupper($datos["marca"]),
@@ -96,6 +97,8 @@ class ProductoService
         if ($datos["foto"] && !is_string($datos["foto"])) {
             $this->cargarFoto($producto, $datos["foto"]);
         }
+
+        $this->fardo_service->incrementaStock($producto->fardo_id);
 
         return $producto;
     }
@@ -119,13 +122,21 @@ class ProductoService
      */
     public function actualizar(array $datos, Producto $producto): Producto
     {
+        $old_producto = clone $producto;
+
         $producto->update([
+            "fardo_id" => $datos["fardo_id"],
             "nombre" => mb_strtoupper($datos["nombre"]),
             "marca" => mb_strtoupper($datos["marca"]),
             "modelo" => mb_strtoupper($datos["modelo"]),
             "precio" => $datos["precio"],
             "talla" => mb_strtoupper($datos["talla"]),
         ]);
+
+        if ($old_producto->fardo_id != $producto->fardo_id) {
+            $this->fardo_service->reduceStock($old_producto->fardo_id);
+            $this->fardo_service->incrementaStock($producto->fardo_id);
+        }
 
         // cargar foto
         if ($datos["foto"] && !is_string($datos["foto"])) {
@@ -143,6 +154,8 @@ class ProductoService
      */
     public function eliminar(Producto $producto): bool|Exception
     {
+        $this->fardo_service->reduceStock($producto->fardo_id);
+
         $producto->status = 0;
         $producto->save();
 

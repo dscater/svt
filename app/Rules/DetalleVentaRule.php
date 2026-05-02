@@ -20,7 +20,7 @@ class DetalleVentaRule implements ValidationRule
         }
 
         foreach ($value as $key => $item) {
-            if (trim($item["producto_id"]) == '') {
+            if (trim($item["registro_id"]) == '') {
                 $fail("No se pudo reconocer el producto de la fila " . ($key + 1));
                 return;
             }

@@ -11,8 +11,18 @@ class DetalleVenta extends Model
 
     protected $fillable = [
         "venta_id",
-        "producto_id",
+        "modulo",
+        "registro_id",
     ];
+
+    protected $appends = ["item"];
+
+    public function getItemAttribute()
+    {
+        return $this->modulo === "Producto"
+            ? $this->producto
+            : $this->fardo;
+    }
 
     public function venta()
     {
@@ -21,6 +31,11 @@ class DetalleVenta extends Model
 
     public function producto()
     {
-        return $this->belongsTo(Producto::class, 'producto_id');
+        return $this->belongsTo(Producto::class, 'registro_id');
+    }
+
+    public function fardo()
+    {
+        return $this->belongsTo(Fardo::class, 'registro_id');
     }
 }
